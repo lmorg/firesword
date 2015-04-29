@@ -1,8 +1,8 @@
 package main
 
 import (
-	"apachelogs"
-	"firesword/sqlite"
+	"github.com/lmorg/apachelogs"
+	"github.com/lmorg/firesword/sqlite"
 	"fmt"
 	ui "github.com/gizak/termui"
 	"github.com/shavac/readline"
