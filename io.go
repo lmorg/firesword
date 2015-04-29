@@ -1,7 +1,7 @@
 package main
 
 import (
-	"apachelogs"
+	"github.com/lmorg/apachelogs"
 	"bufio"
 	"compress/gzip"
 	"fmt"
