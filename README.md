@@ -1,5 +1,7 @@
 # firesword
-An apachetop-style project + log parsing. Provides CLI piping, ncurses and SQL queries
+An apachetop-style project + log parsing. Provides CLI piping, ncurses and SQL queries.
+
+There's still a few bugs to be fixed and features I'm planning to add, but it's already a fairly stable project and very much usable.
 
 _Required imports:_
 
