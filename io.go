@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"bufio"
 	"compress/gzip"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 )
 

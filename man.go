@@ -62,7 +62,7 @@ Global preferences:
 -------------------
   --lower str    Round field down to int. eg "size:1024;" for size in KB.
                    (semicolon delimited, -hf for field names)
-  --nosmp        Disable multi-processor support (SMP enabled by default)
+  --no-smp       Disable multi-processor support (SMP enabled by default)
 
 Ncurses interface:
 ------------------

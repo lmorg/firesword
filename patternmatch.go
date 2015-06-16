@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"regexp"
 	"strings"
@@ -16,7 +16,10 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 			continue
 		}
 
-		var f, op byte
+		var (
+			f  apachelogs.FieldID
+			op apachelogs.OperatorID
+		)
 
 		switch pat[1] {
 		case CLI_STR_IP:

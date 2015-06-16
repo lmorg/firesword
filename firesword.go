@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/lmorg/apachelogs"
+	//"github.com/lmorg/firesword/ncurses"
 	"flag"
 	"fmt"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.7.250 BETA"
+	VERSION   = "0.7.270 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -45,7 +46,7 @@ func flags() {
 	flag.Usage = Usage
 
 	// global
-	flag.BoolVar(&f_nosmp, "nosmp", false, "GOMAXPROCS")
+	flag.BoolVar(&f_nosmp, "no-smp", false, "GOMAXPROCS")
 	flag.BoolVar(&f_debug, "debug", false, "debug mode")
 
 	// Ncurses interface
@@ -74,6 +75,16 @@ func flags() {
 }
 
 func main() {
+	defer func() {
+		//if r := recover(); r != nil {
+		for i := 0; i < 10000; i++ {
+			fmt.Println("###################")
+		}
+		//fmt.Println("Pacnic caught:", r)
+		//os.Exit(1)
+		//}
+	}()
+
 	flags()
 
 	if f_debug {

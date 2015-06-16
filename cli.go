@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"regexp"
 	"strconv"

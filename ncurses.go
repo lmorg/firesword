@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
-	"github.com/lmorg/firesword/sqlite"
 	"fmt"
 	ui "github.com/gizak/termui"
+	"github.com/lmorg/apachelogs"
+	"github.com/lmorg/firesword/sqlite"
 	"github.com/shavac/readline"
 	"os"
 	"os/user"
@@ -43,12 +43,22 @@ func nAddError(msg string) {
 }
 
 func nInit() {
+	defer func() {
+		if r := recover(); r != nil {
+			ui.Close()
+			fmt.Println("Pacnic caught in nInit:", r)
+			os.Exit(1)
+		}
+	}()
+
 	// start ncurses
 	err := ui.Init()
-	ui.UseTheme("helloworld")
 	if err != nil {
-		panic(err)
+		//panic(err)
+		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
+	ui.UseTheme("helloworld")
 
 	// format display
 	errors = ui.NewList()
@@ -80,6 +90,14 @@ func nInit() {
 }
 
 func nRender() {
+	defer func() {
+		if r := recover(); r != nil {
+			nAddError(fmt.Sprint("Pacnic caught in nRender:", r))
+			//nQuit()
+			//fmt.Println("Pacnic caught:", r)
+		}
+	}()
+
 	ui.Body.Width = ui.TermWidth()
 	ui.Body.Align()
 	list.Height = ui.TermHeight() - ERROR_HEIGHT
@@ -106,8 +124,16 @@ func nInterface() {
 		nAddError(fmt.Sprintf("Cannot open history file(%s): %s\n", history_file, err))
 	}
 
-	// catch panics
-	defer nQuit()
+	// catch returns and panics
+	defer func() {
+		if r := recover(); r != nil {
+			nAddError(fmt.Sprint("Pacnic caught in nInterface:", r))
+			//nQuit()
+			//fmt.Println("Pacnic caught:", r)
+		} else {
+			nQuit()
+		}
+	}()
 
 	if f_file_stream != "" {
 		go ReadFileStream(f_file_stream)

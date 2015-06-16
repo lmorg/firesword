@@ -1,9 +1,9 @@
 package sqlite
 
 import (
-	"apachelogs"
 	"database/sql"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 )
@@ -112,6 +112,12 @@ func New( /*filename string*/ ) {
 }
 
 func InsertAccess(access apachelogs.AccessLog, filename string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Pacnic caught:", r)
+		}
+	}()
+
 	_, err = db.Exec(_SQL_INSERT_ACCESS,
 		access.IP,
 		access.Method,
@@ -133,6 +139,12 @@ func InsertAccess(access apachelogs.AccessLog, filename string) (err error) {
 }
 
 func Query(sql string) (rows *sql.Rows, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Pacnic caught:", r)
+		}
+	}()
+
 	rows, err = db.Query(sql)
 	/*if err != nil {
 		log.Fatalln("could not select data:", err)
