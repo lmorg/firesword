@@ -28,7 +28,7 @@ func ManPage() {
 `)
 
 	} else {
-		fmt.Print(`The following is the grep format (braces for illustration perposes only):
+		fmt.Print(`The following is the grep format (braces for illustration purposes only):
 --grep '(field name)(operator)(comparison);(field name)(operator)(comparison);'
 eg: firesword --grep 'time>12:00'
     firesword --grep 'status=500;time<14:35'
@@ -72,15 +72,15 @@ Ncurses interface:
 
 Command line interface:
 -----------------------
-  -f str         Output format (default: "{ip} {uri} {status} {stitle}")
+  --fmt str         Output format (default: "{ip} {uri} {status} {stitle}")
                    (-hf for field names)
   --grep str     Filter results (-hg for patterns)
 
 Input streams:
 --------------
   --stdin        Read from STDIN (not available in ncurses mode)
-  --file str     Read from file stream (file name as string)
-  *              Read from text / gzip file (multiple files space deliminated)
+  -f str         Read from text stream, equivalent to tail -f (file name as string)
+  *              Read from text / gzip file (multiple files space delimited)
 
 Help:
 -----

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	ui "github.com/gizak/termui"
 	"github.com/lmorg/apachelogs"
 	"github.com/lmorg/firesword/sqlite"
+	"fmt"
+	"github.com/gizak/termui"
 	"github.com/shavac/readline"
 	"os"
 	"os/user"
@@ -17,8 +17,12 @@ import (
 const ERROR_HEIGHT = 5
 
 var (
-	errors       *ui.List
-	list         *ui.List
+	errors       *termui.List
+	list         *termui.List
+	bar_chart    *termui.BarChart
+	line_chart   *termui.LineChart
+	UseBar       bool
+	UseLine      bool
 	history_file string
 )
 
@@ -45,25 +49,25 @@ func nAddError(msg string) {
 func nInit() {
 	defer func() {
 		if r := recover(); r != nil {
-			ui.Close()
-			fmt.Println("Pacnic caught in nInit:", r)
+			termui.Close()
+			fmt.Println("Panic caught in nInit:", r)
 			os.Exit(1)
 		}
 	}()
 
 	// start ncurses
-	err := ui.Init()
+	err := termui.Init()
 	if err != nil {
 		//panic(err)
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	ui.UseTheme("helloworld")
+	termui.UseTheme("helloworld")
 
-	// format display
-	errors = ui.NewList()
+	// format display.
+	// dynamic sizing go in nRender()
+	errors = termui.NewList()
 	errors.Height = ERROR_HEIGHT
-	errors.Y = ui.TermHeight() - ERROR_HEIGHT
 	errors.HasBorder = true
 	errors.Border.Label = "Errors:"
 	errors.Items = []string{
@@ -71,41 +75,52 @@ func nInit() {
 		COPYRIGHT,
 	}
 
-	list = ui.NewList()
-	list.Height = ui.TermHeight()
+	list = termui.NewList()
 	list.HasBorder = true
 	list.Border.Label = "Results:"
 
-	ui.Body.AddRows(
-		ui.NewRow(
-			ui.NewCol(12, 0, list),
-		),
-		ui.NewRow(
-			ui.NewCol(12, 0, errors),
-		),
-	)
-
-	// calculate layout
-	ui.Body.Align()
+	// graphs:
+	bar_chart = termui.NewBarChart()
+	bar_chart.Border.Label = "Graph:"
+	bar_chart.BarWidth = 6
+	line_chart = termui.NewLineChart()
+	line_chart.HasBorder = false
+	line_chart.X = 2
 }
 
 func nRender() {
 	defer func() {
 		if r := recover(); r != nil {
-			nAddError(fmt.Sprint("Pacnic caught in nRender:", r))
-			//nQuit()
-			//fmt.Println("Pacnic caught:", r)
+			nAddError(fmt.Sprint("Panic caught in nRender:", r))
 		}
 	}()
 
-	ui.Body.Width = ui.TermWidth()
-	ui.Body.Align()
-	list.Height = ui.TermHeight() - ERROR_HEIGHT
-	ui.Render(ui.Body)
+	// dynamic sizing:
+	errors.Y = termui.TermHeight() - ERROR_HEIGHT
+	errors.Width = termui.TermWidth()
+
+	if UseBar {
+		bar_chart.Width = termui.TermWidth()
+		bar_chart.Height = termui.TermHeight() - ERROR_HEIGHT
+		termui.Render(bar_chart, errors)
+
+	} else if UseLine {
+		list.Width = termui.TermWidth()
+		list.Height = (termui.TermHeight() / 2) - ERROR_HEIGHT
+		line_chart.Height = list.Height - 2
+		line_chart.Width = termui.TermWidth() - 3
+		line_chart.Y = termui.TermHeight() - line_chart.Height - ERROR_HEIGHT - 1
+		termui.Render(line_chart, list, errors)
+
+	} else {
+		list.Width = termui.TermWidth()
+		list.Height = termui.TermHeight() - ERROR_HEIGHT
+		termui.Render(list, errors)
+	}
 }
 
 func nQuit() {
-	ui.Close()
+	termui.Close()
 	sqlite.Close()
 	if err := readline.WriteHistoryFile(history_file); err != nil {
 		fmt.Printf("Cannot write history file (%s): %s\n", history_file, err)
@@ -127,9 +142,7 @@ func nInterface() {
 	// catch returns and panics
 	defer func() {
 		if r := recover(); r != nil {
-			nAddError(fmt.Sprint("Pacnic caught in nInterface:", r))
-			//nQuit()
-			//fmt.Println("Pacnic caught:", r)
+			nAddError(fmt.Sprint("Panic caught in nInterface:", r))
 		} else {
 			nQuit()
 		}
@@ -141,7 +154,7 @@ func nInterface() {
 	} else if len(f_files_static) > 0 {
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
-			go cliWrapper_ReadFileStatic(f_files_static[i], &wg)
+			go ReadFileStaticWrapper(f_files_static[i], &wg)
 		}
 
 	} else {
@@ -150,82 +163,131 @@ func nInterface() {
 		os.Exit(1)
 	}
 
-	evt := ui.EventCh()
+	go nListener()
+
 	for {
-		select {
-		case e := <-evt:
-			if e.Type == ui.EventKey && e.Ch == 'q' {
-				return
+		list.Items = make([]string, 1)
+		rows, err := sqlite.Query(f_sql)
+		if err != nil {
+			nAddError(err.Error())
+
+		} else {
+
+			cols, _ := rows.Columns()
+			for i := 0; i < len(cols); i++ {
+				list.Items[0] += nPrintfModifier(cols[i], cols[i]) + " "
 			}
-			if e.Type == ui.EventKey && e.Ch == 'i' {
+
+			var (
+				record int
+				data   []int
+				labels []string
+				plots  []float64
+			)
+
+			for rows.Next() {
+				record++
+				if (!UseBar && !UseLine && record+ERROR_HEIGHT > termui.TermHeight()) || record >= 200 {
+					break
+				}
+
+				//if record+ERROR_HEIGHT > termui.TermHeight() {
+				//	break
+				//}
+
+				err := sqlite.RowsFetch(rows, len(cols))
+				if err != nil {
+					nAddError(err.Error())
+
+				} else {
+					var s string
+					for i := 0; i < len(cols); i++ {
+						s += nPrintfModifier(cols[i], sqlite.GetField(i)) + " "
+					}
+					list.Items = append(list.Items, s)
+
+					if UseBar {
+						// Slower but robust:
+						//atoi, _ := strconv.Atoi(sqlite.GetField(0))
+						//data = append(data, atoi)
+                        // Quicker, but no erorr handling:
+                        data = append(data, int(sqlite.Field[0].(int64)))
+						labels = append(labels, sqlite.GetField(1))
+					} else if UseLine {
+                        // Slower but robust:
+						// build line graph
+						//atoi, _ := strconv.Atoi(sqlite.GetField(0))
+						//plots = append(plots, atoi)
+                        // Quicker, but no erorr handling:
+						plots = append(plots, float64(sqlite.Field[0].(int64)))
+					}
+				}
+			}
+
+			if UseBar {
+				bar_chart.Data = data
+				bar_chart.DataLabels = labels
+			} else if UseLine {
+				line_chart.Data = plots
+			}
+		}
+
+		// render
+		nRender()
+		time.Sleep(time.Second * time.Duration(f_refresh))
+	}
+	//}
+}
+
+func nListener() {
+	evt := termui.EventCh()
+	for {
+		e := <-evt
+		if e.Type == termui.EventKey {
+			switch e.Ch {
+			case 'q':
+				nQuit()
+				os.Exit(0)
+
+			case 'i':
 				//errors_backup := errors
-				ui.Close()
+				termui.Close()
 				if s := Readline(); s != "" {
 					f_sql = s
 				}
 				nInit()
 				//errors = errors_backup
-				evt = ui.EventCh()
+				evt = termui.EventCh()
 				nRender()
+
+			case 'b':
+				UseBar = !UseBar
+				UseLine = false
+
+			case 'l':
+				UseLine = !UseLine
+				UseBar = false
 			}
-		default:
-			list.Items = make([]string, 1)
-			rows, err := sqlite.Query(f_sql)
-			if err != nil {
-				nAddError(err.Error())
-
-			} else {
-
-				cols, _ := rows.Columns()
-				for i := 0; i < len(cols); i++ {
-					list.Items[0] += nPrintfModifier(cols[i], cols[i]) + " "
-
-				}
-
-				record := 0
-				for rows.Next() {
-					record++
-					if record+ERROR_HEIGHT > ui.TermHeight() {
-						break
-					}
-
-					err := sqlite.RowsFetch(rows, len(cols))
-					if err != nil {
-						nAddError(err.Error())
-
-					} else {
-						var s string
-						for i := 0; i < len(cols); i++ {
-							s += nPrintfModifier(cols[i], sqlite.GetField(i)) + " "
-						}
-						list.Items = append(list.Items, s)
-					}
-				}
-
-			}
-
-			// render
-			nRender()
-			time.Sleep(time.Second * time.Duration(f_refresh))
 		}
 	}
 }
 
-func nInsert(access *apachelogs.AccessLog, filename *string) {
+func nInsert(access *apachelogs.AccessLog) {
 	var err error
 
-	err = sqlite.InsertAccess(*access, *filename)
+	err = sqlite.InsertAccess(*access)
 	if err == nil {
 		return
 	}
 
-	// on error, try 5 more times....
+	// Bit of a kludge, but on error try 5 more times in staggered intervals.
+	// This gets around most of the locking issues but isn't fool proof.
 	go func() {
 		for i := 0; i < 5; i++ {
 			// stagger retries
 			time.Sleep(time.Second / 3)
 
-			err = sqlite.InsertAccess(*access, *filename)
+			err = sqlite.InsertAccess(*access)
 			if err == nil {
 				return
 			}
@@ -246,16 +308,11 @@ func Readline() (s string) {
 	prompt := "SQL> "
 	//loop until ReadLine returns nil (signalling EOF)
 
-	//L:
 	for {
-		//switch result := readline.ReadLine(&prompt); true {
 		switch result := readline.ReadLine(&prompt); true {
-		case result == nil:
-			//println()
-			//break L //exit loop with EOF(^D)
+		case result == nil: // ^d quit
 			return
 		case *result != "": //ignore blank lines
-			//println(*result)
 			s += *result
 			readline.AddHistory(*result) //allow user to recall this line
 		}
@@ -268,47 +325,46 @@ func nPrintfModifier(heading, value string) string {
 	var i int
 
 	switch heading {
-	case CLI_STR_IP:
-		i = cli_sl_ip
-	case CLI_STR_METHOD:
-		i = cli_sl_method
-	case CLI_STR_PROC:
-		i = cli_sl_proc
-	case CLI_STR_PROTO:
-		i = cli_sl_proto
-	case CLI_STR_QS:
-		i = cli_sl_qs
-	case CLI_STR_REF:
-		i = cli_sl_ref
-	case CLI_STR_SIZE:
-		i = cli_sl_size
-	case CLI_STR_STATUS:
-		//i = cli_sl_status
+	case FIELD_IP:
+		i = len_ip
+	case FIELD_METHOD:
+		i = len_method
+	case FIELD_PROC:
+		i = len_proc
+	case FIELD_PROTO:
+		i = len_proto
+	case FIELD_QS:
+		i = len_qs
+	case FIELD_REF:
+		i = len_ref
+	case FIELD_SIZE:
+		i = len_size
+	case FIELD_STATUS:
 		if len(value) == 3 {
 			return "  " + value + " "
 		} else {
 			return value
 		}
-	case CLI_STR_STITLE:
-		i = cli_sl_stitle
-	case CLI_STR_SDESC:
-		i = cli_sl_sdesc
-	case CLI_STR_TIME:
-		i = cli_sl_time
-	case CLI_STR_DATE:
-		i = cli_sl_date
-	case CLI_STR_DATETIME:
-		i = cli_sl_datetime
-	case CLI_STR_EPOCH:
-		i = cli_sl_epoch
-	case CLI_STR_URI:
-		i = cli_sl_uri
-	case CLI_STR_UA:
-		i = cli_sl_ua
-	case CLI_STR_UID:
-		i = cli_sl_uid
-	case CLI_STR_FILE:
-		i = cli_sl_file
+	case FIELD_STITLE:
+		i = len_stitle
+	case FIELD_SDESC:
+		i = len_sdesc
+	case FIELD_TIME:
+		i = len_time
+	case FIELD_DATE:
+		i = len_date
+	case FIELD_DATETIME:
+		i = len_datetime
+	case FIELD_EPOCH:
+		i = len_epoch
+	case FIELD_URI:
+		i = len_uri
+	case FIELD_UA:
+		i = len_ua
+	case FIELD_UID:
+		i = len_uid
+	case FIELD_FILE:
+		i = len_file
 	case "id":
 		i = -7
 	case "sql":
@@ -318,12 +374,6 @@ func nPrintfModifier(heading, value string) string {
 	default:
 		i = -20
 	}
-
-	/*if i < 0 {
-		if len(value) > i*-1 {
-			return val
-		}
-	}*/
 
 	return fmt.Sprintf("%"+strconv.Itoa(i)+"s", Trim(value, i))
 }

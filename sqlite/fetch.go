@@ -73,5 +73,5 @@ func GetField(column int) string {
 	case time.Time:
 		return t.Format("02 Jan 2006 15:04:05")
 	}
-
+	//TODO: probably should do proper conversion here instead of lazy Sprintf
 }

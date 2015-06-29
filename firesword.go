@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/lmorg/apachelogs"
-	//"github.com/lmorg/firesword/ncurses"
 	"flag"
 	"fmt"
 	"os"
@@ -11,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.7.270 BETA"
+	VERSION   = "0.8.410 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -22,7 +21,7 @@ const (
 var (
 	// global
 	f_nosmp bool
-	f_debug bool
+	//f_debug bool
 
 	// Ncurses interface
 	f_ncurses bool
@@ -47,7 +46,7 @@ func flags() {
 
 	// global
 	flag.BoolVar(&f_nosmp, "no-smp", false, "GOMAXPROCS")
-	flag.BoolVar(&f_debug, "debug", false, "debug mode")
+	//flag.BoolVar(&f_debug, "debug", false, "debug mode")
 
 	// Ncurses interface
 	flag.BoolVar(&f_ncurses, "n", false, "Ncurses interface")
@@ -55,12 +54,12 @@ func flags() {
 	flag.StringVar(&f_sql, "sql", "SELECT * FROM default_view", "")
 
 	// CLI interface
-	flag.StringVar(&f_stdout_fmt, "f", "{ip} {uri} {status} {stitle}", "STDOUT format")
+	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "STDOUT format")
 	flag.StringVar(&f_patterns, "grep", "", "filter results")
 
 	// Input streams
 	flag.BoolVar(&f_read_stdin, "stdin", false, "Read from STDIN")
-	flag.StringVar(&f_file_stream, "file", "", "Read from file stream (filename required)")
+	flag.StringVar(&f_file_stream, "f", "", "Read from file stream (filename required)")
 
 	// help
 	flag.BoolVar(&f_help1, "h", false, "Prints this message")
@@ -76,20 +75,17 @@ func flags() {
 
 func main() {
 	defer func() {
-		//if r := recover(); r != nil {
-		for i := 0; i < 10000; i++ {
-			fmt.Println("###################")
+		if r := recover(); r != nil {
+			fmt.Println("Panic caught:", r)
+			os.Exit(1)
 		}
-		//fmt.Println("Pacnic caught:", r)
-		//os.Exit(1)
-		//}
 	}()
 
 	flags()
 
-	if f_debug {
-		apachelogs.Debug = true
-	}
+	//if f_debug {
+	//	apachelogs.Debug = true
+	//}
 
 	if f_help1 || f_help2 {
 		flag.Usage()
@@ -120,36 +116,4 @@ func main() {
 	} else {
 		cliInterface()
 	}
-}
-
-func Trim(s string, length int) string {
-	switch {
-	case length > 0:
-		return lTrim(s, length)
-
-	case length < 0:
-		return rTrim(s, -length)
-	}
-
-	return s
-}
-
-func lTrim(s string, length int) string {
-	if len(s) <= length {
-		return s
-	}
-
-	return "…" + s[len(s)-length+1:]
-}
-
-func rTrim(s string, length int) string {
-	if len(s) <= length {
-		return s
-	}
-
-	return s[:length-1] + "…"
-}
-
-func Round(val, rounder int) int {
-	return int(val/rounder) * rounder
 }

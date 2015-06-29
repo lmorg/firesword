@@ -7,6 +7,7 @@ _Required imports:_
 
     go get github.com/lmorg/apachelogs    # my apache log parsing package
     go get github.com/nsf/termbox-go      # pretty terminal APIs
+    go get github.com/ActiveState/tail    # tail -f like library
     go get github.com/gizak/termui        # required by termbox-go
     go get github.com/shavac/readline     # readline.c support for inputting SQL
     go get github.com/mattn/go-sqlite3    # sqlite engine

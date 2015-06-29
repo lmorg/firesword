@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/lmorg/apachelogs"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -22,33 +22,33 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 		)
 
 		switch pat[1] {
-		case CLI_STR_IP:
+		case FIELD_IP:
 			f = apachelogs.FIELD_IP
-		case CLI_STR_METHOD:
+		case FIELD_METHOD:
 			f = apachelogs.FIELD_METHOD
-		case CLI_STR_PROC:
+		case FIELD_PROC:
 			f = apachelogs.FIELD_PROC_TIME
-		case CLI_STR_PROTO:
+		case FIELD_PROTO:
 			f = apachelogs.FIELD_PROTOCOL
-		case CLI_STR_QS:
+		case FIELD_QS:
 			f = apachelogs.FIELD_QUERY_STRING
-		case CLI_STR_REF:
+		case FIELD_REF:
 			f = apachelogs.FIELD_REFERRER
-		case CLI_STR_SIZE:
+		case FIELD_SIZE:
 			f = apachelogs.FIELD_SIZE
-		case CLI_STR_STATUS:
+		case FIELD_STATUS:
 			f = apachelogs.FIELD_STATUS
-		case CLI_STR_TIME:
+		case FIELD_TIME:
 			f = apachelogs.FIELD_TIME
-		case CLI_STR_DATE:
+		case FIELD_DATE:
 			f = apachelogs.FIELD_DATE
-		case CLI_STR_DATETIME:
+		case FIELD_DATETIME:
 			f = apachelogs.FIELD_DATE_TIME
-		case CLI_STR_URI:
+		case FIELD_URI:
 			f = apachelogs.FIELD_URI
-		case CLI_STR_UA:
+		case FIELD_UA:
 			f = apachelogs.FIELD_USER_AGENT
-		case CLI_STR_UID:
+		case FIELD_UID:
 			f = apachelogs.FIELD_USER_ID
 		default:
 			fmt.Printf("Invalid field: %s\n", pat[1])

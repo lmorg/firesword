@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/lmorg/apachelogs"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -12,46 +12,46 @@ import (
 
 // command line field names
 const (
-	CLI_STR_IP       = "ip"
-	CLI_STR_METHOD   = "method"
-	CLI_STR_PROC     = "proc"
-	CLI_STR_PROTO    = "proto"
-	CLI_STR_QS       = "qs"
-	CLI_STR_REF      = "ref"
-	CLI_STR_SIZE     = "size"
-	CLI_STR_STATUS   = "status"
-	CLI_STR_STITLE   = "stitle"
-	CLI_STR_SDESC    = "sdesc"
-	CLI_STR_TIME     = "time"
-	CLI_STR_DATE     = "date"
-	CLI_STR_DATETIME = "datetime"
-	CLI_STR_EPOCH    = "epoch"
-	CLI_STR_URI      = "uri"
-	CLI_STR_UA       = "ua"
-	CLI_STR_UID      = "uid"
-	CLI_STR_FILE     = "file"
+	FIELD_IP       = "ip"
+	FIELD_METHOD   = "method"
+	FIELD_PROC     = "proc"
+	FIELD_PROTO    = "proto"
+	FIELD_QS       = "qs"
+	FIELD_REF      = "ref"
+	FIELD_SIZE     = "size"
+	FIELD_STATUS   = "status"
+	FIELD_STITLE   = "stitle"
+	FIELD_SDESC    = "sdesc"
+	FIELD_TIME     = "time"
+	FIELD_DATE     = "date"
+	FIELD_DATETIME = "datetime"
+	FIELD_EPOCH    = "epoch"
+	FIELD_URI      = "uri"
+	FIELD_UA       = "ua"
+	FIELD_UID      = "uid"
+	FIELD_FILE     = "file"
 )
 
-// defaults
+// field lengths
 var (
-	cli_sl_ip       int = -15
-	cli_sl_method   int = -4
-	cli_sl_proc     int = 9
-	cli_sl_proto    int = -8
-	cli_sl_qs       int = -20
-	cli_sl_ref      int = 30
-	cli_sl_size     int = 9
-	cli_sl_status   int = -3
-	cli_sl_stitle   int = -20
-	cli_sl_sdesc    int = -40
-	cli_sl_time     int = -8
-	cli_sl_date     int = -11
-	cli_sl_datetime int = -20
-	cli_sl_epoch    int = 10
-	cli_sl_uri      int = 40
-	cli_sl_ua       int = -20
-	cli_sl_uid      int = -10
-	cli_sl_file     int = -10
+	len_ip       int = -15
+	len_method   int = -4
+	len_proc     int = 9
+	len_proto    int = -8
+	len_qs       int = -20
+	len_ref      int = 30
+	len_size     int = 9
+	len_status   int = -3
+	len_stitle   int = -20
+	len_sdesc    int = -40
+	len_time     int = -8
+	len_date     int = -11
+	len_datetime int = -20
+	len_epoch    int = 10
+	len_uri      int = 40
+	len_ua       int = -20
+	len_uid      int = -10
+	len_file     int = -10
 )
 
 // CLI main()
@@ -66,13 +66,13 @@ func cliInterface() {
 
 	} else if f_file_stream != "" {
 		wg.Add(1)
-		go cliWrapper_ReadFileStream(f_file_stream, &wg)
+		go ReadFileStreamWrapper(f_file_stream, &wg)
 
 	} else if len(f_files_static) > 0 {
 
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
-			go cliWrapper_ReadFileStatic(f_files_static[i], &wg)
+			go ReadFileStaticWrapper(f_files_static[i], &wg)
 		}
 
 	} else {
@@ -86,23 +86,23 @@ func cliInterface() {
 // Cycles through the stdout format string looking for string lengths.
 // Runs on start of application.
 func ImportStrLen() {
-	getStrLen(CLI_STR_IP, &cli_sl_ip)
-	getStrLen(CLI_STR_METHOD, &cli_sl_method)
-	getStrLen(CLI_STR_PROC, &cli_sl_proc)
-	getStrLen(CLI_STR_PROTO, &cli_sl_proto)
-	getStrLen(CLI_STR_QS, &cli_sl_qs)
-	getStrLen(CLI_STR_REF, &cli_sl_ref)
-	getStrLen(CLI_STR_SIZE, &cli_sl_size)
-	getStrLen(CLI_STR_STATUS, &cli_sl_status)
-	getStrLen(CLI_STR_STITLE, &cli_sl_stitle)
-	getStrLen(CLI_STR_SDESC, &cli_sl_sdesc)
-	getStrLen(CLI_STR_TIME, &cli_sl_time)
-	getStrLen(CLI_STR_DATE, &cli_sl_date)
-	getStrLen(CLI_STR_EPOCH, &cli_sl_epoch)
-	getStrLen(CLI_STR_URI, &cli_sl_uri)
-	getStrLen(CLI_STR_UA, &cli_sl_ua)
-	getStrLen(CLI_STR_UID, &cli_sl_uid)
-	getStrLen(CLI_STR_FILE, &cli_sl_file)
+	getStrLen(FIELD_IP, &len_ip)
+	getStrLen(FIELD_METHOD, &len_method)
+	getStrLen(FIELD_PROC, &len_proc)
+	getStrLen(FIELD_PROTO, &len_proto)
+	getStrLen(FIELD_QS, &len_qs)
+	getStrLen(FIELD_REF, &len_ref)
+	getStrLen(FIELD_SIZE, &len_size)
+	getStrLen(FIELD_STATUS, &len_status)
+	getStrLen(FIELD_STITLE, &len_stitle)
+	getStrLen(FIELD_SDESC, &len_sdesc)
+	getStrLen(FIELD_TIME, &len_time)
+	getStrLen(FIELD_DATE, &len_date)
+	getStrLen(FIELD_EPOCH, &len_epoch)
+	getStrLen(FIELD_URI, &len_uri)
+	getStrLen(FIELD_UA, &len_ua)
+	getStrLen(FIELD_UID, &len_uid)
+	getStrLen(FIELD_FILE, &len_file)
 }
 
 // Gets the string length for each item and then reformat stdout format string
@@ -116,9 +116,6 @@ func getStrLen(item string, val *int) {
 	}
 
 	*val, _ = strconv.Atoi(found[0][1])
-	//if *val == "0" {
-	//	*val = ""
-	//}
 
 	for i, _ := range found[0] {
 		f_stdout_fmt = strings.Replace(
@@ -129,54 +126,25 @@ func getStrLen(item string, val *int) {
 	}
 }
 
-/*func CompilePrintf(item string, val *int) {
-	rx, _ := regexp.Compile(`{` + item + `,(\-?[0-9]+)}`)
-	found := rx.FindAllStringSubmatch(f_stdout_fmt, -1)
-
-	if len(found) == 0 || len(found[0]) == 0 {
-		return
-	}
-
-	*val, _ = strconv.Atoi(found[0][1])
-
-	for i, _ := range found[0] {
-		f_stdout_fmt = strings.Replace(
-			f_stdout_fmt,
-			fmt.Sprintf("{%s,%s}", item, found[0][i]),
-			fmt.Sprintf("{%s}", item),
-			-1)
-	}
-}
-*/
-func cliWrapper_ReadFileStream(filename string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	ReadFileStream(filename)
-}
-
-func cliWrapper_ReadFileStatic(filename string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	ReadFileStatic(filename)
-}
-
-func PrintAccessLogs(access *apachelogs.AccessLog, filename string) {
+func PrintAccessLogs(access *apachelogs.AccessLog) {
 	s := f_stdout_fmt
-	formatSTDOUT(&s, CLI_STR_IP, access.IP, cli_sl_ip)
-	formatSTDOUT(&s, CLI_STR_METHOD, access.Method, cli_sl_method)
-	formatSTDOUT(&s, CLI_STR_PROC, strconv.Itoa(access.ProcTime), cli_sl_proc)
-	formatSTDOUT(&s, CLI_STR_PROTO, access.Protocol, cli_sl_proto)
-	formatSTDOUT(&s, CLI_STR_QS, access.QueryString, cli_sl_qs)
-	formatSTDOUT(&s, CLI_STR_REF, access.Referrer, cli_sl_ref)
-	formatSTDOUT(&s, CLI_STR_SIZE, strconv.Itoa(access.Size), cli_sl_size)
-	formatSTDOUT(&s, CLI_STR_STATUS, access.Status.A, cli_sl_status)
-	formatSTDOUT(&s, CLI_STR_STITLE, access.Status.Title(), cli_sl_stitle)
-	formatSTDOUT(&s, CLI_STR_SDESC, access.Status.Description(), cli_sl_sdesc)
-	formatSTDOUT(&s, CLI_STR_TIME, access.DateTime.Format(FMT_TIME), cli_sl_time)
-	formatSTDOUT(&s, CLI_STR_DATE, access.DateTime.Format(FMT_DATE), cli_sl_date)
-	formatSTDOUT(&s, CLI_STR_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), cli_sl_epoch)
-	formatSTDOUT(&s, CLI_STR_URI, access.URI, cli_sl_uri)
-	formatSTDOUT(&s, CLI_STR_UA, access.UserAgent, cli_sl_ua)
-	formatSTDOUT(&s, CLI_STR_UID, access.UserID, cli_sl_uid)
-	formatSTDOUT(&s, CLI_STR_FILE, filename, cli_sl_file)
+	formatSTDOUT(&s, FIELD_IP, access.IP, len_ip)
+	formatSTDOUT(&s, FIELD_METHOD, access.Method, len_method)
+	formatSTDOUT(&s, FIELD_PROC, strconv.Itoa(access.ProcTime), len_proc)
+	formatSTDOUT(&s, FIELD_PROTO, access.Protocol, len_proto)
+	formatSTDOUT(&s, FIELD_QS, access.QueryString, len_qs)
+	formatSTDOUT(&s, FIELD_REF, access.Referrer, len_ref)
+	formatSTDOUT(&s, FIELD_SIZE, strconv.Itoa(access.Size), len_size)
+	formatSTDOUT(&s, FIELD_STATUS, access.Status.A, len_status)
+	formatSTDOUT(&s, FIELD_STITLE, access.Status.Title(), len_stitle)
+	formatSTDOUT(&s, FIELD_SDESC, access.Status.Description(), len_sdesc)
+	formatSTDOUT(&s, FIELD_TIME, access.DateTime.Format(FMT_TIME), len_time)
+	formatSTDOUT(&s, FIELD_DATE, access.DateTime.Format(FMT_DATE), len_date)
+	formatSTDOUT(&s, FIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
+	formatSTDOUT(&s, FIELD_URI, access.URI, len_uri)
+	formatSTDOUT(&s, FIELD_UA, access.UserAgent, len_ua)
+	formatSTDOUT(&s, FIELD_UID, access.UserID, len_uid)
+	formatSTDOUT(&s, FIELD_FILE, access.FileName, len_file)
 	fmt.Println(s)
 }
 

@@ -1,0 +1,177 @@
+package sqlite
+
+//go:generate stringer -type=InsertOperation
+
+// Experimental insert routine which groups records for insert rather than inserting them one at a time.
+// However to group the records, a lot of boilerplate code was required. A heck of a lot. And this
+// resulted in the end product running no quicker than the slower individual inserts while also adding
+// a few issues of it's own. So the code is left out of the main project, but source included as
+// reference for anyone to include back in if they so wish.
+
+import (
+	"apachelogs"
+	//"fmt"
+	"time"
+    "log"
+)
+
+const (
+	_SQL_INSERT_ACCESS_HEADER = `INSERT INTO access (
+							ip,
+							method,
+							proc,
+							proto,
+							qs,
+							ref,
+							size,
+							status,
+							stitle,
+							sdesc,
+							datetime,
+							uri,
+							ua,
+							uid,
+							file
+						) VALUES` //(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+
+	_SQL_INSERT_ACCESS_ENTRY = ` (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),`
+
+)
+
+
+var insert chan insertObject
+
+func init() {
+	insert = make(chan insertObject)
+}
+
+type InsertOperation byte
+
+const (
+	OP_APPEND_ACCESS InsertOperation = iota + 1
+	OP_APPEND_ERROR
+	OP_COMMIT_ACCESS
+	OP_COMMIT_ERROR
+)
+
+type insertObject struct {
+	AccessLog *apachelogs.AccessLog
+	Operation InsertOperation
+}
+
+func insertEventHandler() {
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			//fmt.Println("out of sleep")
+			insert <- insertObject{Operation: OP_COMMIT_ACCESS}
+		}
+	}()
+
+	build_header := func(n int) (s string) {
+		for i := 0; i < n; i++ {
+			s += _SQL_INSERT_ACCESS_ENTRY
+		}
+
+		if len(s) > 3 {
+			s = s[:len(s)-1] + ";"
+		}
+		//fmt.Printf("[%d] %s", n, s)
+		return
+	}
+
+	var access []interface{}
+	for {
+		obj := <-insert
+		switch obj.Operation {
+		default:
+			continue
+
+		case OP_APPEND_ACCESS:
+			access = append(access,
+				obj.AccessLog.IP,
+				obj.AccessLog.Method,
+				obj.AccessLog.ProcTime,
+				obj.AccessLog.Protocol,
+				obj.AccessLog.QueryString,
+				obj.AccessLog.Referrer,
+				obj.AccessLog.Size,
+				obj.AccessLog.Status.I,
+				obj.AccessLog.Status.Title(),
+				obj.AccessLog.Status.Description(),
+				obj.AccessLog.DateTime,
+				obj.AccessLog.URI,
+				obj.AccessLog.UserAgent,
+				obj.AccessLog.UserID,
+				obj.AccessLog.FileName,
+			)
+
+            if len(access) > 15*50 {
+                go func() { 
+			        insert <- insertObject{Operation: OP_COMMIT_ACCESS}
+                }()
+}
+
+		case OP_COMMIT_ACCESS:
+            if len(access) == 0 {
+                continue
+            }
+
+			_, err := db.Exec(
+				_SQL_INSERT_ACCESS_HEADER+build_header(len(access)/15), //TODO: make const
+				access...,
+			)
+			if err != nil {
+				log.Println(err, _SQL_INSERT_ACCESS_HEADER+build_header(len(access)/15))
+				//panic(err)
+			}
+			//access = *new([]interface{})
+			access = make([]interface{},0)
+		}
+	}
+}
+
+func InsertAccess(access apachelogs.AccessLog) (err error) {
+	/*defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("Panic caught: %s", r))
+		}
+	}()*/
+	//go func() {
+	insert <- insertObject{
+		AccessLog: &access,
+		Operation: OP_APPEND_ACCESS,
+	}
+	//}()
+	return
+}
+
+/*
+func InsertAccess(access apachelogs.AccessLog) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			//fmt.Println("Panic caught:", r)
+			err = errors.New(fmt.Sprintf("Panic caught: %s", r))
+		}
+	}()
+
+	_, err = db.Exec(_SQL_INSERT_ACCESS,
+		access.IP,
+		access.Method,
+		access.ProcTime,
+		access.Protocol,
+		access.QueryString,
+		access.Referrer,
+		access.Size,
+		access.Status.I,
+		access.Status.Title(),
+		access.Status.Description(),
+		access.DateTime,
+		access.URI,
+		access.UserAgent,
+		access.UserID,
+		access.FileName,
+	)
+	return
+}
+*/

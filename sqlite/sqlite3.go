@@ -1,9 +1,10 @@
 package sqlite
 
 import (
+	"apachelogs"
 	"database/sql"
+	"errors"
 	"fmt"
-	"github.com/lmorg/apachelogs"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 )
@@ -55,6 +56,7 @@ func New( /*filename string*/ ) {
 	// empty string == in memory
 	//if filename == "" {
 	filename := ":memory:"
+	//filename := "logs.db"
 	//}
 
 	var err error
@@ -69,52 +71,30 @@ func New( /*filename string*/ ) {
 	}
 
 	// views
-	_, err = db.Exec(_VIEW_ALL)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
+	view := func(sql string) {
+		_, err = db.Exec(sql)
+		if err != nil {
+			log.Fatalln("could not create view:", err)
+		}
 	}
 
-	_, err = db.Exec(_VIEW_LATEST_NON_200)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
+	view(_VIEW_ALL)
+	view(_VIEW_LATEST_NON_200)
+	view(_VIEW_LATEST_PROC)
+	view(_VIEW_LATEST_304)
+	view(_VIEW_COUNT_STATUS)
+	view(_VIEW_COUNT_304)
+	view(_VIEW_COUNT_SIZE)
+	view(_VIEW_LIST_VIEWS)
 
-	_, err = db.Exec(_VIEW_LATEST_PROC)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
-	_, err = db.Exec(_VIEW_LATEST_304)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
-	_, err = db.Exec(_VIEW_COUNT_STATUS)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
-	_, err = db.Exec(_VIEW_COUNT_304)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
-	_, err = db.Exec(_VIEW_COUNT_SIZE)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
-	_, err = db.Exec(_VIEW_LIST_VIEWS)
-	if err != nil {
-		log.Fatalln("could not create view:", err)
-	}
-
+	//go insertEventHandler()
 }
 
-func InsertAccess(access apachelogs.AccessLog, filename string) (err error) {
+func InsertAccess(access apachelogs.AccessLog) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Pacnic caught:", r)
+			//fmt.Println("Panic caught:", r)
+			err = errors.New(fmt.Sprintf("Panic caught: %s", r))
 		}
 	}()
 
@@ -133,7 +113,7 @@ func InsertAccess(access apachelogs.AccessLog, filename string) (err error) {
 		access.URI,
 		access.UserAgent,
 		access.UserID,
-		filename,
+		access.FileName,
 	)
 	return
 }
@@ -141,14 +121,12 @@ func InsertAccess(access apachelogs.AccessLog, filename string) (err error) {
 func Query(sql string) (rows *sql.Rows, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Pacnic caught:", r)
+			err = errors.New(fmt.Sprintf("Panic caught: %s", r))
 		}
 	}()
 
 	rows, err = db.Query(sql)
-	/*if err != nil {
-		log.Fatalln("could not select data:", err)
-	}*/
+
 	return
 }
 
