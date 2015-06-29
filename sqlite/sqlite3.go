@@ -1,7 +1,7 @@
 package sqlite
 
 import (
-	"apachelogs"
+	"github.com/lmorg/apachelogs"
 	"database/sql"
 	"errors"
 	"fmt"
