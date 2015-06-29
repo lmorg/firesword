@@ -54,14 +54,12 @@ Date / Time Formats:
 }
 
 func Usage() {
-	fmt.Print(`Usage: firesword -n [--lower str] [-r int] [-t int]  --file str | *
-                 [--lower str] [-f str] [--grep str] --stdin | --file str | *
+	fmt.Print(`Usage: firesword -n [-r int] [-t int]     -f str | *
+                 [--fmt str] [--grep str] --stdin | -f str | *
                  -h | -hf | -hg | -v
 
 Global preferences:
 -------------------
-  --lower str    Round field down to int. eg "size:1024;" for size in KB.
-                   (semicolon delimited, -hf for field names)
   --no-smp       Disable multi-processor support (SMP enabled by default)
 
 Ncurses interface:
