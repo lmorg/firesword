@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
-	"github.com/lmorg/firesword/sqlite"
 	"fmt"
 	"github.com/gizak/termui"
+	"github.com/lmorg/apachelogs"
+	"github.com/lmorg/firesword/sqlite"
 	"github.com/shavac/readline"
 	"os"
 	"os/user"
@@ -148,16 +148,21 @@ func nInterface() {
 		}
 	}()
 
-	if f_file_stream != "" {
-		go ReadFileStream(f_file_stream)
+	if len(f_files_stream) > 0 {
+		for i := 0; i < len(f_files_stream); i++ {
+			wg.Add(1)
+			go ReadFileStaticWrapper(f_files_stream[i], &wg)
+		}
 
-	} else if len(f_files_static) > 0 {
+	}
+
+	if len(f_files_static) > 0 {
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
 			go ReadFileStaticWrapper(f_files_static[i], &wg)
 		}
 
-	} else {
+	} else if len(f_files_stream) == 0 {
 		nQuit()
 		fmt.Println("No input files given. Run with -h for help")
 		os.Exit(1)
@@ -210,15 +215,15 @@ func nInterface() {
 						// Slower but robust:
 						//atoi, _ := strconv.Atoi(sqlite.GetField(0))
 						//data = append(data, atoi)
-                        // Quicker, but no erorr handling:
-                        data = append(data, int(sqlite.Field[0].(int64)))
+						// Quicker, but no erorr handling:
+						data = append(data, int(sqlite.Field[0].(int64)))
 						labels = append(labels, sqlite.GetField(1))
 					} else if UseLine {
-                        // Slower but robust:
+						// Slower but robust:
 						// build line graph
 						//atoi, _ := strconv.Atoi(sqlite.GetField(0))
 						//plots = append(plots, atoi)
-                        // Quicker, but no erorr handling:
+						// Quicker, but no erorr handling:
 						plots = append(plots, float64(sqlite.Field[0].(int64)))
 					}
 				}

@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.8.410 BETA"
+	VERSION   = "0.8.420 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -21,7 +21,6 @@ const (
 var (
 	// global
 	f_nosmp bool
-	//f_debug bool
 
 	// Ncurses interface
 	f_ncurses bool
@@ -34,19 +33,23 @@ var (
 
 	// Input streams
 	f_read_stdin   bool
-	f_file_stream  string
-	f_files_static []string
+	f_files_stream FlagStrings
+	f_files_static FlagStrings
 
 	// Usage
 	f_help1, f_help2, f_help_f, f_help_g, f_version1, f_version2 bool
 )
+
+type FlagStrings []string
+
+func (fs *FlagStrings) String() string         { return fmt.Sprint(*fs) }
+func (fs *FlagStrings) Set(value string) error { *fs = append(*fs, value); return nil }
 
 func flags() {
 	flag.Usage = Usage
 
 	// global
 	flag.BoolVar(&f_nosmp, "no-smp", false, "GOMAXPROCS")
-	//flag.BoolVar(&f_debug, "debug", false, "debug mode")
 
 	// Ncurses interface
 	flag.BoolVar(&f_ncurses, "n", false, "Ncurses interface")
@@ -59,7 +62,7 @@ func flags() {
 
 	// Input streams
 	flag.BoolVar(&f_read_stdin, "stdin", false, "")
-	flag.StringVar(&f_file_stream, "f", "", "tail -f stream")
+	flag.Var(&f_files_stream, "f", "tail -f stream")
 
 	// help
 	flag.BoolVar(&f_help1, "h", false, "help")
@@ -83,10 +86,6 @@ func main() {
 
 	flags()
 
-	//if f_debug {
-	//	apachelogs.Debug = true
-	//}
-
 	if f_help1 || f_help2 {
 		flag.Usage()
 		os.Exit(1)
@@ -102,7 +101,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	//if f_gomaxprocs {
 	if !f_nosmp {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}

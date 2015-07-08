@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"regexp"
 	"strconv"
@@ -64,12 +64,13 @@ func cliInterface() {
 		wg.Add(1)
 		go ReadSTDIN()
 
-	} else if f_file_stream != "" {
-		wg.Add(1)
-		go ReadFileStreamWrapper(f_file_stream, &wg)
+	} else if len(f_files_stream) > 0 {
+		for i := 0; i < len(f_files_static); i++ {
+			wg.Add(1)
+			go ReadFileStreamWrapper(f_files_stream[i], &wg)
+		}
 
 	} else if len(f_files_static) > 0 {
-
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
 			go ReadFileStaticWrapper(f_files_static[i], &wg)
