@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"flag"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"runtime"
 )
@@ -50,7 +50,7 @@ func flags() {
 
 	// Ncurses interface
 	flag.BoolVar(&f_ncurses, "n", false, "Ncurses interface")
-	flag.Int64Var(&f_refresh, "r", 1, "Ncursers refresh rate (seconds)")
+	flag.Int64Var(&f_refresh, "r", 1, "Ncursers refresh rate")
 	flag.StringVar(&f_sql, "sql", "SELECT * FROM default_view", "")
 
 	// CLI interface
@@ -58,16 +58,16 @@ func flags() {
 	flag.StringVar(&f_patterns, "grep", "", "filter results")
 
 	// Input streams
-	flag.BoolVar(&f_read_stdin, "stdin", false, "Read from STDIN")
-	flag.StringVar(&f_file_stream, "f", "", "Read from file stream (filename required)")
+	flag.BoolVar(&f_read_stdin, "stdin", false, "")
+	flag.StringVar(&f_file_stream, "f", "", "tail -f stream")
 
 	// help
-	flag.BoolVar(&f_help1, "h", false, "Prints this message")
+	flag.BoolVar(&f_help1, "h", false, "help")
 	flag.BoolVar(&f_help2, "?", false, "Same as -h")
-	flag.BoolVar(&f_help_f, "hf", false, "Prints format field names")
-	flag.BoolVar(&f_help_g, "hg", false, "Prints grep guide")
-	flag.BoolVar(&f_version1, "v", false, "Prints version number")
-	flag.BoolVar(&f_version2, "version", false, "Prints version number")
+	flag.BoolVar(&f_help_f, "hf", false, "format field names")
+	flag.BoolVar(&f_help_g, "hg", false, "grep guide")
+	flag.BoolVar(&f_version1, "v", false, "version")
+	flag.BoolVar(&f_version2, "version", false, "same as -v")
 
 	flag.Parse()
 	f_files_static = flag.Args()
