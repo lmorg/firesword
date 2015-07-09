@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/lmorg/apachelogs"
 	"os"
@@ -119,6 +120,11 @@ func getStrLen(item string, val *int) {
 	*val, _ = strconv.Atoi(found[0][1])
 
 	for i, _ := range found[0] {
+		if found[0][i] == "0" {
+			fmt.Println("0 (zero) is not allowed as field length.")
+			os.Exit(1)
+		}
+
 		f_stdout_fmt = strings.Replace(
 			f_stdout_fmt,
 			fmt.Sprintf("{%s,%s}", item, found[0][i]),
@@ -127,6 +133,27 @@ func getStrLen(item string, val *int) {
 	}
 }
 
+/*
+ * Everything from here downwards is an experimental switch from strings and
+ * fmt functions which use interface{}..., to []byte, append and os.Stdout.Write.
+ *
+ * I'm actually seeing 3 seconds shaved off my benchmarks - which I know is
+ * meaningless to anyone reading this without sample sizes and machine specs.
+ * But it gives you an idea as to why this ugly code exists.
+ *
+ * One day I might actually rewrite this entire project and it's sister package
+ * (apachelogs) to run entirely on []byte. However apathy will probably prevail...
+ * and it's not as if this utility is slow anyway.
+ *
+ * A more pressing requirement would be to making this code a little more readable
+ * (eg removing the commented out code) and testing it thoroughly for bugs.
+ * However for now I'm going to ship this beta code; you can uncomment the
+ * following two functions then delete everything else that proceeds it should
+ * you run into any annoying show-stopper bugs. Or pull the code from Github as
+ * I may have fixed things by the time you read this :)
+ */
+
+/*
 func PrintAccessLogs(access *apachelogs.AccessLog) {
 	s := f_stdout_fmt
 	formatSTDOUT(&s, FIELD_IP, access.IP, len_ip)
@@ -148,7 +175,8 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 	formatSTDOUT(&s, FIELD_FILE, access.FileName, len_file)
 	fmt.Println(s)
 }
-
+*/
+/*
 func formatSTDOUT(source *string, search, value string, length int) {
 	slength := strconv.Itoa(length)
 	if slength == "0" {
@@ -158,3 +186,77 @@ func formatSTDOUT(source *string, search, value string, length int) {
 	value = Trim(fmt.Sprintf("%"+slength+"s", value), length)
 	*source = strings.Replace(*source, "{"+search+"}", value, -1)
 }
+*/
+
+var (
+	bFIELD_IP       = []byte("ip")
+	bFIELD_METHOD   = []byte("method")
+	bFIELD_PROC     = []byte("proc")
+	bFIELD_PROTO    = []byte("proto")
+	bFIELD_QS       = []byte("qs")
+	bFIELD_REF      = []byte("ref")
+	bFIELD_SIZE     = []byte("size")
+	bFIELD_STATUS   = []byte("status")
+	bFIELD_STITLE   = []byte("stitle")
+	bFIELD_SDESC    = []byte("sdesc")
+	bFIELD_TIME     = []byte("time")
+	bFIELD_DATE     = []byte("date")
+	bFIELD_DATETIME = []byte("datetime")
+	bFIELD_EPOCH    = []byte("epoch")
+	bFIELD_URI      = []byte("uri")
+	bFIELD_UA       = []byte("ua")
+	bFIELD_UID      = []byte("uid")
+	bFIELD_FILE     = []byte("file")
+)
+
+func PrintAccessLogs(access *apachelogs.AccessLog) {
+	b := []byte(f_stdout_fmt)
+	formatSTDOUTb(&b, bFIELD_IP, access.IP, len_ip)
+	formatSTDOUTb(&b, bFIELD_METHOD, access.Method, len_method)
+	formatSTDOUTb(&b, bFIELD_PROC, strconv.Itoa(access.ProcTime), len_proc)
+	formatSTDOUTb(&b, bFIELD_PROTO, access.Protocol, len_proto)
+	formatSTDOUTb(&b, bFIELD_QS, access.QueryString, len_qs)
+	formatSTDOUTb(&b, bFIELD_REF, access.Referrer, len_ref)
+	formatSTDOUTb(&b, bFIELD_SIZE, strconv.Itoa(access.Size), len_size)
+	formatSTDOUTb(&b, bFIELD_STATUS, access.Status.A, len_status)
+	formatSTDOUTb(&b, bFIELD_STITLE, access.Status.Title(), len_stitle)
+	formatSTDOUTb(&b, bFIELD_SDESC, access.Status.Description(), len_sdesc)
+	formatSTDOUTb(&b, bFIELD_TIME, access.DateTime.Format(FMT_TIME), len_time)
+	formatSTDOUTb(&b, bFIELD_DATE, access.DateTime.Format(FMT_DATE), len_date)
+	formatSTDOUTb(&b, bFIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
+	formatSTDOUTb(&b, bFIELD_URI, access.URI, len_uri)
+	formatSTDOUTb(&b, bFIELD_UA, access.UserAgent, len_ua)
+	formatSTDOUTb(&b, bFIELD_UID, access.UserID, len_uid)
+	formatSTDOUTb(&b, bFIELD_FILE, access.FileName, len_file)
+	b = append(b, '\n')
+	os.Stdout.Write(b)
+}
+
+func formatSTDOUTb(source *[]byte, search []byte, value string, length int) {
+	//b = []byte(value)
+	if length > 0 {
+		if len(value) > length {
+			value = "…" + value[len(value)-length+1:]
+		} else {
+			value = spaces[:length-len(value)] + value
+		}
+
+	} else {
+		l := -length
+		if len(value) > l {
+			value = value[:l-1] + "…"
+		} else {
+			value = value + spaces[:l-len(value)]
+		}
+
+	}
+	search = append(search, bc)
+	*source = bytes.Replace(*source, append(bo, search...), []byte(value), -1)
+}
+
+var (
+	bo []byte = []byte{'{'}
+	bc byte   = '}'
+)
+
+var spaces = "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "
