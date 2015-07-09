@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.8.430 BETA"
+	VERSION   = "0.8.431 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -20,7 +20,8 @@ const (
 // flags
 var (
 	// global
-	f_nosmp bool
+	f_no_smp    bool
+	f_no_errors bool
 
 	// Ncurses interface
 	f_ncurses bool
@@ -49,7 +50,8 @@ func flags() {
 	flag.Usage = Usage
 
 	// global
-	flag.BoolVar(&f_nosmp, "no-smp", false, "GOMAXPROCS")
+	flag.BoolVar(&f_no_smp, "no-smp", false, "GOMAXPROCS")
+	flag.BoolVar(&f_no_errors, "no-errors", false, "surpress errors")
 
 	// Ncurses interface
 	flag.BoolVar(&f_ncurses, "n", false, "Ncurses interface")
@@ -101,7 +103,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !f_nosmp {
+	if !f_no_smp {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 

@@ -40,6 +40,10 @@ func ReadSTDIN() {
 			} else {
 				PrintAccessLogs(access)
 			}
+
+		} else if err != nil && !f_no_errors {
+			errOut(err)
+			os.Exit(2)
 		}
 	}
 }
@@ -56,6 +60,10 @@ func ReadFileStream(filename string) {
 }
 
 func errOut(err error) {
+	if f_no_errors {
+		return
+	}
+
 	if f_ncurses {
 		nAddError(err.Error())
 	} else {

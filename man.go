@@ -26,6 +26,10 @@ func HelpDetail() {
   ua          User agent
   uid         User ID (if applicable)
   uri         URI
+
+--fmt field lengths are comma-separated printf-style values. eg
+  "{ref,-30}" Referrer,  30 characters padding, left justified
+  "{file,40}" File name, 40 characters padding, right justified
 `)
 
 	} else {
@@ -62,6 +66,7 @@ func Usage() {
 Global preferences:
 -------------------
   --no-smp       Disable multi-processor support (SMP enabled by default)
+  --no-errors    Surpress error messages, don't fail on unless fatal
 
 Ncurses interface:
 ------------------
@@ -71,8 +76,8 @@ Ncurses interface:
 
 Command line interface:
 -----------------------
-  --fmt str         Output format (default: "{ip} {uri} {status} {stitle}")
-                   (-hf for field names)
+  --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
+                     (-hf for field names and how to declare field lengths)
   --grep str     Filter results (-hg for patterns)
 
 Input streams:

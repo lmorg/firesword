@@ -51,7 +51,7 @@ func nInit() {
 		if r := recover(); r != nil {
 			termui.Close()
 			fmt.Println("Panic caught in nInit:", r)
-			os.Exit(1)
+			os.Exit(2)
 		}
 	}()
 
@@ -60,7 +60,7 @@ func nInit() {
 	if err != nil {
 		//panic(err)
 		fmt.Println("Error:", err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 	termui.UseTheme("helloworld")
 
