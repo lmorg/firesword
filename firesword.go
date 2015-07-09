@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.8.420 BETA"
+	VERSION   = "0.8.430 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -80,7 +80,7 @@ func main() {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Panic caught:", r)
-			os.Exit(1)
+			os.Exit(2)
 		}
 	}()
 
@@ -92,7 +92,7 @@ func main() {
 	}
 
 	if f_help_f || f_help_g {
-		ManPage()
+		HelpDetail()
 		os.Exit(1)
 	}
 

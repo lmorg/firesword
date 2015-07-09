@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"bufio"
 	"fmt"
 	"github.com/ActiveState/tail"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"sync"
 )
@@ -28,13 +28,12 @@ func ReadFileStaticWrapper(filename string, wg *sync.WaitGroup) {
 func ReadSTDIN() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		// TODO: investigate if scanner.Text saves a string(b) later
-		b := scanner.Bytes()
+		s := scanner.Text()
 
-		access, err, matched := apachelogs.ParseAccessLine(string(b))
+		access, err, matched := apachelogs.ParseAccessLine(s)
 
 		if err == nil && matched {
-			access.FileName = "/dev/stdin"
+			access.FileName = "<STDIN>"
 			if f_ncurses {
 				nInsert(access)
 
