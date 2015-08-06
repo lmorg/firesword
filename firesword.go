@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.8.440 BETA + experimental []byte patch"
+	VERSION   = "0.9.451 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -39,6 +39,19 @@ var (
 
 	// Usage
 	f_help1, f_help2, f_help_f, f_help_g, f_version1, f_version2 bool
+
+	// Output handlers to manage between CLI and ncurses modes
+	stdout_handler func(access *apachelogs.AccessLog)
+	stderr_handler func(message string)
+	main_handler   func()
+
+	// Lazy fix to check if compiled with ncurses.
+	// Ncurses can be enabled or disabled via '// +build ignore' (without quotes)
+	// at the top of ncurses.go
+	//
+	// Ncurses mode also requires sqlite and readline - so compiling with ncurses
+	// breaks cross-compiling portability for the sake of extra features.
+	ncurses_compiled bool
 )
 
 type FlagStrings []string
@@ -112,8 +125,16 @@ func main() {
 	}
 
 	if f_ncurses {
-		nInterface()
+		if !ncurses_compiled {
+			fmt.Println(APP_NAME, "has been compiled without ncurses support.")
+			os.Exit(1)
+		}
+
 	} else {
-		cliInterface()
+		stdout_handler = PrintAccessLogs
+		stderr_handler = PrintStdError
+		main_handler = cliInterface
 	}
+
+	main_handler()
 }

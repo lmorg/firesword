@@ -93,4 +93,7 @@ Help:
   -hg            Prints grep pattern guide
   -v             Prints version number
 `)
+	if !ncurses_compiled {
+		fmt.Println("!!!", APP_NAME, "has been compiled without ncurses support !!!")
+	}
 }

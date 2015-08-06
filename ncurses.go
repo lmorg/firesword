@@ -1,3 +1,9 @@
+// Remove the following commented line to compile with ncurses support:
+// +build ignore
+//
+// Ncurses mode also requires sqlite and readline - so compiling with ncurses
+// breaks cross-compiling portability for the sake of extra features.
+
 package main
 
 import (
@@ -27,6 +33,11 @@ var (
 )
 
 func init() {
+	ncurses_compiled = true
+	stdout_handler = nInsert
+	stderr_handler = nAddError
+	main_handler = nInterface
+
 	usr, _ := user.Current()
 	history_file = usr.HomeDir + "/." + strings.ToLower(APP_NAME) + "_history"
 }

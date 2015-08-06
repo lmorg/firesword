@@ -209,6 +209,10 @@ var (
 	bFIELD_FILE     = []byte("file")
 )
 
+func PrintStdError(message string) {
+	os.Stderr.Write([]byte(message))
+}
+
 func PrintAccessLogs(access *apachelogs.AccessLog) {
 	b := []byte(f_stdout_fmt)
 	formatSTDOUTb(&b, bFIELD_IP, access.IP, len_ip)

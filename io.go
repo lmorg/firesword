@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/ActiveState/tail"
 	"github.com/lmorg/apachelogs"
 	"os"
@@ -16,13 +15,7 @@ func ReadFileStreamWrapper(filename string, wg *sync.WaitGroup) {
 
 func ReadFileStaticWrapper(filename string, wg *sync.WaitGroup) {
 	defer wg.Done()
-
-	if f_ncurses {
-		apachelogs.ReadAccessLog(filename, nInsert, errOut)
-	} else {
-		apachelogs.ReadAccessLog(filename, PrintAccessLogs, errOut)
-	}
-
+	apachelogs.ReadAccessLog(filename, stdout_handler, errOut)
 }
 
 func ReadSTDIN() {
@@ -34,12 +27,7 @@ func ReadSTDIN() {
 
 		if err == nil && matched {
 			access.FileName = "<STDIN>"
-			if f_ncurses {
-				nInsert(access)
-
-			} else {
-				PrintAccessLogs(access)
-			}
+			stdout_handler(access)
 
 		} else if err != nil && !f_no_errors {
 			errOut(err)
@@ -64,9 +52,5 @@ func errOut(err error) {
 		return
 	}
 
-	if f_ncurses {
-		nAddError(err.Error())
-	} else {
-		fmt.Println("ERROR:", err)
-	}
+	stderr_handler(err.Error())
 }
