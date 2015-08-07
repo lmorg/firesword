@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/lmorg/apachelogs"
 	"fmt"
+	"github.com/lmorg/apachelogs"
 	"os"
 	"regexp"
 	"strings"
 )
 
 func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
-	rx_op, _ := regexp.Compile(`^([a-z]+)(>|<|=\+|!\+|=~|!~|!=|<>|==|=)(.*)`)
+	rx_op, _ := regexp.Compile(`^([a-z]+)(>|<|=\+|!\+|=~|!~|!=|<>|==|=|~<|~>|\{\})(.*)`)
 	for _, s := range strings.Split(cli, ";") {
 		pat := rx_op.FindStringSubmatch(s)
 		if len(pat) < 4 {
@@ -73,12 +73,23 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 			op = apachelogs.OP_REGEX_EQ
 		case "!~":
 			op = apachelogs.OP_REGEX_NE
+		case "~<":
+			op = apachelogs.OP_ROUND_DOWN
+		case "~>":
+			op = apachelogs.OP_ROUND_UP
+		case "{}":
+			op = apachelogs.OP_REGEX_SUB
 		default:
 			fmt.Printf("Invalid operator: %s\n", pat[2])
 			os.Exit(1)
 		}
 
-		p = append(p, apachelogs.NewPattern(f, op, pat[3]))
+		new_pat, err := apachelogs.NewPattern(f, op, pat[3])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		p = append(p, new_pat)
 
 	}
 
