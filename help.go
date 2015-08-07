@@ -1,8 +1,46 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
+
+func Usage() {
+	fmt.Print(`Usage: firesword -n [-r int] [-t int]     -f str | *
+                 [--fmt str] [--grep str] --stdin | -f str | *
+                 -h | -hf | -hg | -v
+
+Global preferences:
+-------------------
+  --no-smp       Disable multi-processor support (SMP enabled by default)
+  --no-errors    Surpress error messages, don't fail on unless fatal
+
+Ncurses interface:
+------------------
+  -n             Start ncurses mode. The real time user interface
+  -r int         Refresh rate in seconds (default is 1 second)
+  --sql str      SQL to start with (default is "SELECT * FROM default_view")
+
+Command line interface:
+-----------------------
+  --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
+                     (-hf for field names and how to declare field lengths)
+  --grep str     Filter results (-hg for patterns)
+
+Input streams:
+--------------
+  --stdin        Read from STDIN (not available in ncurses mode)
+  -f str         Read from text stream, equivalent to tail -f (file name as string)
+  *              Read from text / gzip file (multiple files space delimited)
+
+Help:
+-----
+  -h | -?        Prints this usage guide
+  -hf            Prints format field names
+  -hg            Prints grep pattern guide
+  -v             Prints version number
+`)
+	if !ncurses_compiled {
+		fmt.Println("!!!", APP_NAME, "has been compiled without ncurses support !!!")
+	}
+}
 
 func HelpDetail() {
 	if f_help_f {
@@ -58,45 +96,5 @@ Date / Time Formats:
   time: hh:mm
 (Date and time fields are entered as strings but processed as numeric fields)
 `)
-	}
-}
-
-func Usage() {
-	fmt.Print(`Usage: firesword -n [-r int] [-t int]     -f str | *
-                 [--fmt str] [--grep str] --stdin | -f str | *
-                 -h | -hf | -hg | -v
-
-Global preferences:
--------------------
-  --no-smp       Disable multi-processor support (SMP enabled by default)
-  --no-errors    Surpress error messages, don't fail on unless fatal
-
-Ncurses interface:
-------------------
-  -n             Start ncurses mode. The real time user interface
-  -r int         Refresh rate in seconds (default is 1 second)
-  --sql str      SQL to start with (default is "SELECT * FROM default_view")
-
-Command line interface:
------------------------
-  --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
-                     (-hf for field names and how to declare field lengths)
-  --grep str     Filter results (-hg for patterns)
-
-Input streams:
---------------
-  --stdin        Read from STDIN (not available in ncurses mode)
-  -f str         Read from text stream, equivalent to tail -f (file name as string)
-  *              Read from text / gzip file (multiple files space delimited)
-
-Help:
------
-  -h | -?        Prints this usage guide
-  -hf            Prints format field names
-  -hg            Prints grep pattern guide
-  -v             Prints version number
-`)
-	if !ncurses_compiled {
-		fmt.Println("!!!", APP_NAME, "has been compiled without ncurses support !!!")
 	}
 }
