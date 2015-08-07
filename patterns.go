@@ -9,7 +9,7 @@ import (
 )
 
 func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
-	rx_op, _ := regexp.Compile(`^([a-z]+)(>|<|=\+|!\+|=~|!~|!=|<>|==|=|~<|~>|\{\})(.*)`)
+	rx_op, _ := regexp.Compile(`^([a-z]+)(>|<|=\+|!\+|=~|!~|!=|<>|==|=|~<|~>|\{\}|/|\*)(.*)`)
 	for _, s := range strings.Split(cli, ";") {
 		pat := rx_op.FindStringSubmatch(s)
 		if len(pat) < 4 {
@@ -79,6 +79,10 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 			op = apachelogs.OP_ROUND_UP
 		case "{}":
 			op = apachelogs.OP_REGEX_SUB
+		case "/":
+			op = apachelogs.OP_DIVIDE
+		case "*":
+			op = apachelogs.OP_DIVIDE
 		default:
 			fmt.Printf("Invalid operator: %s\n", pat[2])
 			os.Exit(1)

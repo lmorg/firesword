@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.10.460 BETA"
+	VERSION   = "0.10.470 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"

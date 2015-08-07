@@ -107,6 +107,8 @@ _Additionally required for ncurses support:_
 	  ~<  round field down to the nearest n (numeric fields only)
 	  ~>  round field up to the nearest n   (numeric fields only)
 	  {}  regex substitution: {search}{replace} (string fields only)
+	  /   divide                            (numeric fields only)
+	  *   multiply                          (numeric fields only)
 
 	Date / Time Formats:
 	--------------------
