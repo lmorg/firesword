@@ -29,10 +29,18 @@ func ReadSTDIN() {
 			access.FileName = "<STDIN>"
 			stdout_handler(access)
 
+		} else if err != nil {
+			errOut(err)
+		}
+
+		/*if err == nil && matched {
+			access.FileName = "<STDIN>"
+			stdout_handler(access)
+
 		} else if err != nil && !f_no_errors {
 			errOut(err)
 			os.Exit(2)
-		}
+		}*/
 	}
 }
 
@@ -43,6 +51,9 @@ func ReadFileStream(filename string) {
 		panic(err)
 	}
 	for line := range t.Lines {
+		if line.Err != nil {
+			errOut(line.Err)
+		}
 		apachelogs.ParseAccessLine(line.Text)
 	}
 }

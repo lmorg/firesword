@@ -210,7 +210,8 @@ var (
 )
 
 func PrintStdError(message string) {
-	os.Stderr.Write([]byte(message))
+	b := append([]byte(message), '\n')
+	os.Stderr.Write(b)
 }
 
 func PrintAccessLogs(access *apachelogs.AccessLog) {

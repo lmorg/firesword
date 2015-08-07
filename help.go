@@ -48,6 +48,9 @@ Operators:
   !+  does not contain                  (string fields only)
   =~  regex matches                     (string fields only)
   !~  regex does not match              (string fields only)
+  ~<  round field down to the nearest n (numeric fields only)
+  ~>  round field up to the nearest n   (numeric fields only)
+  {}  regex substitution: {search}{replace} (string fields only)
 
 Date / Time Formats:
 --------------------
