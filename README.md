@@ -4,7 +4,7 @@ An apachetop-style project + log parsing. Provides CLI piping, ncurses and SQL q
 
 There's still a few bugs to be fixed and features I'm planning to add, but it's already a fairly stable project and very much usable.
 
-_...about nurses support:_
+_About nurses support:_
 
 Ncurses can be enabled or disabled via '// +build ignore' (without quotes) at the top of ncurses.go
 
@@ -15,7 +15,8 @@ Ncurses mode also requires sqlite and readline, so compiling with ncurses breaks
     go get github.com/lmorg/apachelogs    # my apache log parsing package
     go get github.com/ActiveState/tail    # tail -f like library
 
-_...for ncurses support:_
+_Additionally required for ncurses support:_
+
     go get github.com/nsf/termbox-go      # pretty terminal APIs
     go get github.com/shavac/readline     # readline.c support for inputting SQL
     go get github.com/mattn/go-sqlite3    # sqlite engine
