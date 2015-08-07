@@ -6,7 +6,7 @@ There's still a few bugs to be fixed and features I'm planning to add, but it's 
 
 _About nurses support:_
 
-Ncurses can be enabled or disabled via '// +build ignore' (without quotes) at the top of ncurses.go
+Ncurses can be enabled or disabled via '`// +build ignore`' at the top of ncurses.go
 
 Ncurses mode also requires sqlite and readline, so compiling with ncurses breaks cross-compiling portability (which is why I disable it by default)
 
@@ -83,8 +83,8 @@ _Additionally required for ncurses support:_
 	  uri         URI
 
 	--fmt field lengths are comma-separated printf-style values. eg
-	  "{ref,-30}" Referrer,  30 characters padding, left justified
-	  "{file,40}" File name, 40 characters padding, right justified
+	  "{ref,-30}" == Referrer,  30 characters padding, left justified
+	  "{file,40}" == File name, 40 characters padding, right justified
 
 
 ### firesward -hg

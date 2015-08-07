@@ -66,8 +66,8 @@ func HelpDetail() {
   uri         URI
 
 --fmt field lengths are comma-separated printf-style values. eg
-  "{ref,-30}" Referrer,  30 characters padding, left justified
-  "{file,40}" File name, 40 characters padding, right justified
+  "{ref,-30}" == Referrer,  30 characters padding, left justified
+  "{file,40}" == File name, 40 characters padding, right justified
 `)
 
 	} else {
