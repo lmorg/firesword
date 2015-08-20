@@ -23,6 +23,7 @@ Command line interface:
   --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
                      (-hf for field names and how to declare field lengths)
   --grep str     Filter results (-hg for patterns)
+  --trim-slash   Trims trailing slash from URI (useful for "sort | uniq -c")
 
 Input streams:
 --------------
@@ -75,6 +76,7 @@ func HelpDetail() {
 --grep '(field name)(operator)(comparison);(field name)(operator)(comparison);'
 eg: firesword --grep 'time>12:00'
     firesword --grep 'status=500;time<14:35'
+    firesword --grep 'uri{}{foo}{bar}'
     
 Operators:
 ----------
@@ -88,7 +90,7 @@ Operators:
   !~  regex does not match              (string fields only)
   ~<  round field down to the nearest n (numeric fields only)
   ~>  round field up to the nearest n   (numeric fields only)
-  {}  regex substitution: {search}{replace} (string fields only)
+  {}  regex substitution: {search}{replace} (string fields only, case insensitive)
   /   divide                            (numeric fields only)
   *   multiply                          (numeric fields only)
 

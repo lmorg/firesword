@@ -215,6 +215,16 @@ func PrintStdError(message string) {
 }
 
 func PrintAccessLogs(access *apachelogs.AccessLog) {
+	if f_trim_slash {
+
+		if len(access.URI) > 1 && access.URI[len(access.URI)-1] == '/' {
+			access.URI = access.URI[:len(access.URI)-1]
+
+		} else if access.URI == "/" {
+			access.URI = "-"
+		}
+	}
+
 	b := []byte(f_stdout_fmt)
 	formatSTDOUTb(&b, bFIELD_IP, access.IP, len_ip)
 	formatSTDOUTb(&b, bFIELD_METHOD, access.Method, len_method)
@@ -238,7 +248,6 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 }
 
 func formatSTDOUTb(source *[]byte, search []byte, value string, length int) {
-	//b = []byte(value)
 	if length > 0 {
 		if len(value) > length {
 			value = "…" + value[len(value)-length+1:]

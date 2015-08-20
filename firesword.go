@@ -10,7 +10,7 @@ import (
 
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.10.470 BETA"
+	VERSION   = "0.10.481 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
 
 	FMT_DATE = "02 Jan 2006"
@@ -31,6 +31,7 @@ var (
 	// CLI interface
 	f_stdout_fmt string
 	f_patterns   string
+	f_trim_slash bool
 
 	// Input streams
 	f_read_stdin   bool
@@ -74,6 +75,7 @@ func flags() {
 	// CLI interface
 	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "STDOUT format")
 	flag.StringVar(&f_patterns, "grep", "", "filter results")
+	flag.BoolVar(&f_trim_slash, "trim-slash", false, "")
 
 	// Input streams
 	flag.BoolVar(&f_read_stdin, "stdin", false, "")
