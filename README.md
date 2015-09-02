@@ -65,7 +65,7 @@ _Additionally required for ncurses support:_
 	Field names:
 	------------
 	  date        Date of request
-	  datetime    Date and time of request (not available to --fmt, use "{date} {time}")
+	  datetime    Date and time of request
 	  epoch       EPOCH (UNIX) timestamp (not yet available to --grep)
 	  file        File name of log
 	  ip          IP address
