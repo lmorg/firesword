@@ -1,5 +1,9 @@
 package main
 
+// this file is a horrible mess, but it's got a lot of beta code written for
+// performance. In a future git commit I will remove old code and tidy this
+// file up.
+
 import (
 	"bytes"
 	"fmt"
@@ -59,6 +63,7 @@ var (
 func cliInterface() {
 	var wg sync.WaitGroup
 
+	cropUnusedFmt()
 	ImportStrLen()
 
 	if f_read_stdin {
@@ -100,6 +105,7 @@ func ImportStrLen() {
 	getStrLen(FIELD_SDESC, &len_sdesc)
 	getStrLen(FIELD_TIME, &len_time)
 	getStrLen(FIELD_DATE, &len_date)
+	getStrLen(FIELD_DATETIME, &len_datetime)
 	getStrLen(FIELD_EPOCH, &len_epoch)
 	getStrLen(FIELD_URI, &len_uri)
 	getStrLen(FIELD_UA, &len_ua)
@@ -226,23 +232,78 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 	}
 
 	b := []byte(f_stdout_fmt)
-	formatSTDOUTb(&b, bFIELD_IP, access.IP, len_ip)
-	formatSTDOUTb(&b, bFIELD_METHOD, access.Method, len_method)
-	formatSTDOUTb(&b, bFIELD_PROC, strconv.Itoa(access.ProcTime), len_proc)
-	formatSTDOUTb(&b, bFIELD_PROTO, access.Protocol, len_proto)
-	formatSTDOUTb(&b, bFIELD_QS, access.QueryString, len_qs)
-	formatSTDOUTb(&b, bFIELD_REF, access.Referrer, len_ref)
-	formatSTDOUTb(&b, bFIELD_SIZE, strconv.Itoa(access.Size), len_size)
-	formatSTDOUTb(&b, bFIELD_STATUS, access.Status.A, len_status)
-	formatSTDOUTb(&b, bFIELD_STITLE, access.Status.Title(), len_stitle)
-	formatSTDOUTb(&b, bFIELD_SDESC, access.Status.Description(), len_sdesc)
-	formatSTDOUTb(&b, bFIELD_TIME, access.DateTime.Format(FMT_TIME), len_time)
-	formatSTDOUTb(&b, bFIELD_DATE, access.DateTime.Format(FMT_DATE), len_date)
-	formatSTDOUTb(&b, bFIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
-	formatSTDOUTb(&b, bFIELD_URI, access.URI, len_uri)
-	formatSTDOUTb(&b, bFIELD_UA, access.UserAgent, len_ua)
-	formatSTDOUTb(&b, bFIELD_UID, access.UserID, len_uid)
-	formatSTDOUTb(&b, bFIELD_FILE, access.FileName, len_file)
+	if len_ip != 0 {
+		formatSTDOUTb(&b, bFIELD_IP, access.IP, len_ip)
+	}
+
+	if len_method != 0 {
+		formatSTDOUTb(&b, bFIELD_METHOD, access.Method, len_method)
+	}
+
+	if len_proc != 0 {
+		formatSTDOUTb(&b, bFIELD_PROC, strconv.Itoa(access.ProcTime), len_proc)
+	}
+
+	if len_proto != 0 {
+		formatSTDOUTb(&b, bFIELD_PROTO, access.Protocol, len_proto)
+	}
+
+	if len_qs != 0 {
+		formatSTDOUTb(&b, bFIELD_QS, access.QueryString, len_qs)
+	}
+
+	if len_ref != 0 {
+		formatSTDOUTb(&b, bFIELD_REF, access.Referrer, len_ref)
+	}
+
+	if len_size != 0 {
+		formatSTDOUTb(&b, bFIELD_SIZE, strconv.Itoa(access.Size), len_size)
+	}
+
+	if len_status != 0 {
+		formatSTDOUTb(&b, bFIELD_STATUS, access.Status.A, len_status)
+	}
+
+	if len_stitle != 0 {
+		formatSTDOUTb(&b, bFIELD_STITLE, access.Status.Title(), len_stitle)
+	}
+
+	if len_sdesc != 0 {
+		formatSTDOUTb(&b, bFIELD_SDESC, access.Status.Description(), len_sdesc)
+	}
+
+	if len_time != 0 {
+		formatSTDOUTb(&b, bFIELD_TIME, access.DateTime.Format(FMT_TIME), len_time)
+	}
+
+	if len_date != 0 {
+		formatSTDOUTb(&b, bFIELD_DATE, access.DateTime.Format(FMT_DATE), len_date)
+	}
+
+	if len_datetime != 0 {
+		formatSTDOUTb(&b, bFIELD_DATETIME, access.DateTime.Format(FMT_DATE+" "+FMT_DATE), len_datetime)
+	}
+
+	if len_epoch != 0 {
+		formatSTDOUTb(&b, bFIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
+	}
+
+	if len_uri != 0 {
+		formatSTDOUTb(&b, bFIELD_URI, access.URI, len_uri)
+	}
+
+	if len_ua != 0 {
+		formatSTDOUTb(&b, bFIELD_UA, access.UserAgent, len_ua)
+	}
+
+	if len_uid != 0 {
+		formatSTDOUTb(&b, bFIELD_UID, access.UserID, len_uid)
+	}
+
+	if len_file != 0 {
+		formatSTDOUTb(&b, bFIELD_FILE, access.FileName, len_file)
+	}
+
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
@@ -274,3 +335,78 @@ var (
 )
 
 var spaces = "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "
+
+func cropUnusedFmt() {
+	if !strings.Contains(f_stdout_fmt, FIELD_IP) {
+		len_ip = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_METHOD) {
+		len_method = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_PROC) {
+		len_proc = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_PROTO) {
+		len_proto = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_QS) {
+		len_qs = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_REF) {
+		len_ref = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_SIZE) {
+		len_size = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_STATUS) {
+		len_status = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_STITLE) {
+		len_stitle = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_SDESC) {
+		len_sdesc = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_TIME) {
+		len_time = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_DATE) {
+		len_date = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_DATETIME) {
+		len_datetime = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_EPOCH) {
+		len_epoch = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_URI) {
+		len_uri = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_UA) {
+		len_ua = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_UID) {
+		len_uid = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_FILE) {
+		len_file = 0
+	}
+
+}

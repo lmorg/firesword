@@ -8,18 +8,22 @@ import (
 	"runtime"
 )
 
+// App versioning
 const (
 	APP_NAME  = "Firesword"
-	VERSION   = "0.10.481 BETA"
+	VERSION   = "0.11.481 BETA"
 	COPYRIGHT = "© 2014-2015 Laurence Morgan"
+)
 
+// Date / time output formatting
+const (
 	FMT_DATE = "02 Jan 2006"
 	FMT_TIME = "15:04:05"
 )
 
-// flags
+// Command line flags
 var (
-	// global
+	// Global
 	f_no_smp    bool
 	f_no_errors bool
 
