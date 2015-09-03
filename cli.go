@@ -1,9 +1,5 @@
 package main
 
-// this file is a horrible mess, but it's got a lot of beta code written for
-// performance. In a future git commit I will remove old code and tidy this
-// file up.
-
 import (
 	"bytes"
 	"fmt"
@@ -15,8 +11,10 @@ import (
 	"sync"
 )
 
-// command line field names
-const (
+// Command line field names.
+// The code duplication is nasty, but realistically it needs to be
+// both string and byte slice for performance reasons.
+var (
 	FIELD_IP       = "ip"
 	FIELD_METHOD   = "method"
 	FIELD_PROC     = "proc"
@@ -35,9 +33,28 @@ const (
 	FIELD_UA       = "ua"
 	FIELD_UID      = "uid"
 	FIELD_FILE     = "file"
+
+	bFIELD_IP       = []byte("ip")
+	bFIELD_METHOD   = []byte("method")
+	bFIELD_PROC     = []byte("proc")
+	bFIELD_PROTO    = []byte("proto")
+	bFIELD_QS       = []byte("qs")
+	bFIELD_REF      = []byte("ref")
+	bFIELD_SIZE     = []byte("size")
+	bFIELD_STATUS   = []byte("status")
+	bFIELD_STITLE   = []byte("stitle")
+	bFIELD_SDESC    = []byte("sdesc")
+	bFIELD_TIME     = []byte("time")
+	bFIELD_DATE     = []byte("date")
+	bFIELD_DATETIME = []byte("datetime")
+	bFIELD_EPOCH    = []byte("epoch")
+	bFIELD_URI      = []byte("uri")
+	bFIELD_UA       = []byte("ua")
+	bFIELD_UID      = []byte("uid")
+	bFIELD_FILE     = []byte("file")
 )
 
-// field lengths
+// Field lengths
 var (
 	len_ip       int = -15
 	len_method   int = -4
@@ -57,6 +74,17 @@ var (
 	len_ua       int = -20
 	len_uid      int = -10
 	len_file     int = -10
+)
+
+// Weird variable, but this allows printf-style padding using fast
+// slicing rather than slow fmt.Printf([]interface{}...)'s
+var spaces = "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "
+
+// Used for concatenating byte slices with append()
+// (the braces are part of the field matching in the command line string)
+var (
+	brace_open  []byte = []byte{'{'}
+	brace_close byte   = '}'
 )
 
 // CLI main()
@@ -88,6 +116,85 @@ func cliInterface() {
 	}
 
 	wg.Wait()
+}
+
+// Check if fields are being used in --fmt. Do this up front and
+// then set the field length to zero to disable if field unused.
+// This saves searching through the --fmt string for each value
+// against every log line outputted (slow).
+func cropUnusedFmt() {
+	if !strings.Contains(f_stdout_fmt, FIELD_IP) {
+		len_ip = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_METHOD) {
+		len_method = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_PROC) {
+		len_proc = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_PROTO) {
+		len_proto = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_QS) {
+		len_qs = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_REF) {
+		len_ref = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_SIZE) {
+		len_size = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_STATUS) {
+		len_status = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_STITLE) {
+		len_stitle = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_SDESC) {
+		len_sdesc = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_TIME) {
+		len_time = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_DATE) {
+		len_date = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_DATETIME) {
+		len_datetime = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_EPOCH) {
+		len_epoch = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_URI) {
+		len_uri = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_UA) {
+		len_ua = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_UID) {
+		len_uid = 0
+	}
+
+	if !strings.Contains(f_stdout_fmt, FIELD_FILE) {
+		len_file = 0
+	}
+
 }
 
 // Cycles through the stdout format string looking for string lengths.
@@ -138,82 +245,6 @@ func getStrLen(item string, val *int) {
 			-1)
 	}
 }
-
-/*
- * Everything from here downwards is an experimental switch from strings and
- * fmt functions which use interface{}..., to []byte, append and os.Stdout.Write.
- *
- * I'm actually seeing 3 seconds shaved off my benchmarks - which I know is
- * meaningless to anyone reading this without sample sizes and machine specs.
- * But it gives you an idea as to why this ugly code exists.
- *
- * One day I might actually rewrite this entire project and it's sister package
- * (apachelogs) to run entirely on []byte. However apathy will probably prevail...
- * and it's not as if this utility is slow anyway.
- *
- * A more pressing requirement would be to making this code a little more readable
- * (eg removing the commented out code) and testing it thoroughly for bugs.
- * However for now I'm going to ship this beta code; you can uncomment the
- * following two functions then delete everything else that proceeds it should
- * you run into any annoying show-stopper bugs. Or pull the code from Github as
- * I may have fixed things by the time you read this :)
- */
-
-/*
-func PrintAccessLogs(access *apachelogs.AccessLog) {
-	s := f_stdout_fmt
-	formatSTDOUT(&s, FIELD_IP, access.IP, len_ip)
-	formatSTDOUT(&s, FIELD_METHOD, access.Method, len_method)
-	formatSTDOUT(&s, FIELD_PROC, strconv.Itoa(access.ProcTime), len_proc)
-	formatSTDOUT(&s, FIELD_PROTO, access.Protocol, len_proto)
-	formatSTDOUT(&s, FIELD_QS, access.QueryString, len_qs)
-	formatSTDOUT(&s, FIELD_REF, access.Referrer, len_ref)
-	formatSTDOUT(&s, FIELD_SIZE, strconv.Itoa(access.Size), len_size)
-	formatSTDOUT(&s, FIELD_STATUS, access.Status.A, len_status)
-	formatSTDOUT(&s, FIELD_STITLE, access.Status.Title(), len_stitle)
-	formatSTDOUT(&s, FIELD_SDESC, access.Status.Description(), len_sdesc)
-	formatSTDOUT(&s, FIELD_TIME, access.DateTime.Format(FMT_TIME), len_time)
-	formatSTDOUT(&s, FIELD_DATE, access.DateTime.Format(FMT_DATE), len_date)
-	formatSTDOUT(&s, FIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
-	formatSTDOUT(&s, FIELD_URI, access.URI, len_uri)
-	formatSTDOUT(&s, FIELD_UA, access.UserAgent, len_ua)
-	formatSTDOUT(&s, FIELD_UID, access.UserID, len_uid)
-	formatSTDOUT(&s, FIELD_FILE, access.FileName, len_file)
-	fmt.Println(s)
-}
-*/
-/*
-func formatSTDOUT(source *string, search, value string, length int) {
-	slength := strconv.Itoa(length)
-	if slength == "0" {
-		slength = ""
-	}
-
-	value = Trim(fmt.Sprintf("%"+slength+"s", value), length)
-	*source = strings.Replace(*source, "{"+search+"}", value, -1)
-}
-*/
-
-var (
-	bFIELD_IP       = []byte("ip")
-	bFIELD_METHOD   = []byte("method")
-	bFIELD_PROC     = []byte("proc")
-	bFIELD_PROTO    = []byte("proto")
-	bFIELD_QS       = []byte("qs")
-	bFIELD_REF      = []byte("ref")
-	bFIELD_SIZE     = []byte("size")
-	bFIELD_STATUS   = []byte("status")
-	bFIELD_STITLE   = []byte("stitle")
-	bFIELD_SDESC    = []byte("sdesc")
-	bFIELD_TIME     = []byte("time")
-	bFIELD_DATE     = []byte("date")
-	bFIELD_DATETIME = []byte("datetime")
-	bFIELD_EPOCH    = []byte("epoch")
-	bFIELD_URI      = []byte("uri")
-	bFIELD_UA       = []byte("ua")
-	bFIELD_UID      = []byte("uid")
-	bFIELD_FILE     = []byte("file")
-)
 
 func PrintStdError(message string) {
 	b := append([]byte(message), '\n')
@@ -325,88 +356,6 @@ func formatSTDOUTb(source *[]byte, search []byte, value string, length int) {
 		}
 
 	}
-	search = append(search, bc)
-	*source = bytes.Replace(*source, append(bo, search...), []byte(value), -1)
-}
-
-var (
-	bo []byte = []byte{'{'}
-	bc byte   = '}'
-)
-
-var spaces = "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "
-
-func cropUnusedFmt() {
-	if !strings.Contains(f_stdout_fmt, FIELD_IP) {
-		len_ip = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_METHOD) {
-		len_method = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_PROC) {
-		len_proc = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_PROTO) {
-		len_proto = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_QS) {
-		len_qs = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_REF) {
-		len_ref = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_SIZE) {
-		len_size = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_STATUS) {
-		len_status = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_STITLE) {
-		len_stitle = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_SDESC) {
-		len_sdesc = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_TIME) {
-		len_time = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_DATE) {
-		len_date = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_DATETIME) {
-		len_datetime = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_EPOCH) {
-		len_epoch = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_URI) {
-		len_uri = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_UA) {
-		len_ua = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_UID) {
-		len_uid = 0
-	}
-
-	if !strings.Contains(f_stdout_fmt, FIELD_FILE) {
-		len_file = 0
-	}
-
+	search = append(search, brace_close)
+	*source = bytes.Replace(*source, append(brace_open, search...), []byte(value), -1)
 }
