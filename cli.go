@@ -29,6 +29,7 @@ var (
 	FIELD_DATE     = "date"
 	FIELD_DATETIME = "datetime"
 	FIELD_EPOCH    = "epoch"
+	FIELD_UNIX     = "unix"
 	FIELD_URI      = "uri"
 	FIELD_UA       = "ua"
 	FIELD_UID      = "uid"
@@ -48,6 +49,7 @@ var (
 	bFIELD_DATE     = []byte("date")
 	bFIELD_DATETIME = []byte("datetime")
 	bFIELD_EPOCH    = []byte("epoch")
+	bFIELD_UNIX     = []byte("unix")
 	bFIELD_URI      = []byte("uri")
 	bFIELD_UA       = []byte("ua")
 	bFIELD_UID      = []byte("uid")
@@ -175,7 +177,7 @@ func cropUnusedFmt() {
 		len_datetime = 0
 	}
 
-	if !strings.Contains(f_stdout_fmt, FIELD_EPOCH) {
+	if !strings.Contains(f_stdout_fmt, FIELD_EPOCH) && !strings.Contains(f_stdout_fmt, FIELD_UNIX) {
 		len_epoch = 0
 	}
 
@@ -214,6 +216,7 @@ func ImportStrLen() {
 	getStrLen(FIELD_DATE, &len_date)
 	getStrLen(FIELD_DATETIME, &len_datetime)
 	getStrLen(FIELD_EPOCH, &len_epoch)
+	getStrLen(FIELD_UNIX, &len_epoch)
 	getStrLen(FIELD_URI, &len_uri)
 	getStrLen(FIELD_UA, &len_ua)
 	getStrLen(FIELD_UID, &len_uid)
@@ -316,7 +319,9 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 	}
 
 	if len_epoch != 0 {
-		formatSTDOUTb(&b, bFIELD_EPOCH, strconv.FormatInt(access.DateTime.Unix(), 10), len_epoch)
+		s := strconv.FormatInt(access.DateTime.Unix(), 10)
+		formatSTDOUTb(&b, bFIELD_EPOCH, s, len_epoch)
+		formatSTDOUTb(&b, bFIELD_UNIX, s, len_epoch)
 	}
 
 	if len_uri != 0 {

@@ -47,24 +47,24 @@ func HelpDetail() {
 	if f_help_f {
 		fmt.Print(`Field names:
 ------------
-  date        Date of request
-  datetime    Date and time of request
-  epoch       EPOCH (UNIX) timestamp (not yet available to --grep)
-  file        File name of log
-  ip          IP address
-  method      HTTP method (eg GET, POST, HEAD, etc)
-  proc        Processing time
-  proto       Protocol (eg HTTP, HTTPS)
-  qs          Query string
-  ref         Referrer
-  sdesc       HTTP status description (not available to --grep)
-  size        HTTP response body size
-  status      HTTP status (--grep as string)
-  stitle      HTTP status title (not available to --grep)
-  time        Time of request
-  ua          User agent
-  uid         User ID (if applicable)
-  uri         URI
+  date           Date of request
+  datetime       Date and time of request
+  epoch / unix   EPOCH (UNIX) timestamp (not yet available to --grep)
+  file           File name of log
+  ip             IP address
+  method         HTTP method (eg GET, POST, HEAD, etc)
+  proc           Processing time
+  proto          Protocol (eg HTTP, HTTPS)
+  qs             Query string
+  ref            Referrer
+  sdesc          HTTP status description (not available to --grep)
+  size           HTTP response body size
+  status         HTTP status (--grep as string)
+  stitle         HTTP status title (not available to --grep)
+  time           Time of request
+  ua             User agent
+  uid            User ID (if applicable)
+  uri            URI
 
 --fmt field lengths are comma-separated printf-style values. eg
   "{ref,-30}" == Referrer,  30 characters padding, left justified
