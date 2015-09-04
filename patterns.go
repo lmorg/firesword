@@ -5,7 +5,9 @@ import (
 	"github.com/lmorg/apachelogs"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
@@ -50,6 +52,14 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 			f = apachelogs.FIELD_USER_AGENT
 		case FIELD_UID:
 			f = apachelogs.FIELD_USER_ID
+		case FIELD_EPOCH, FIELD_UNIX:
+			f = apachelogs.FIELD_DATE_TIME
+			t, err := strconv.ParseInt(pat[3], 10, 64)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			pat[3] = time.Unix(t, 0).Format("01-02-2006 15:04")
 		default:
 			fmt.Printf("Invalid field: %s\n", pat[1])
 			os.Exit(1)
@@ -82,7 +92,7 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 		case "/":
 			op = apachelogs.OP_DIVIDE
 		case "*":
-			op = apachelogs.OP_DIVIDE
+			op = apachelogs.OP_MULTIPLY
 		default:
 			fmt.Printf("Invalid operator: %s\n", pat[2])
 			os.Exit(1)

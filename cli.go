@@ -75,7 +75,7 @@ var (
 	len_uri      int = 40
 	len_ua       int = -20
 	len_uid      int = -10
-	len_file     int = -10
+	len_file     int = -20
 )
 
 // Weird variable, but this allows printf-style padding using fast
@@ -315,7 +315,7 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 	}
 
 	if len_datetime != 0 {
-		formatSTDOUTb(&b, bFIELD_DATETIME, access.DateTime.Format(FMT_DATE+" "+FMT_DATE), len_datetime)
+		formatSTDOUTb(&b, bFIELD_DATETIME, access.DateTime.Format(FMT_DATETIME), len_datetime)
 	}
 
 	if len_epoch != 0 {

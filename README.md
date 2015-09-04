@@ -66,8 +66,8 @@ _Additionally required for ncurses support:_
 	------------
 	  date           Date of request
 	  datetime       Date and time of request
-	  epoch / unix   EPOCH (UNIX) timestamp (not yet available to --grep)
-	  file           File name of log
+	  epoch / unix   EPOCH (UNIX) timestamp (seconds)
+	  file           File name of log (not available to --grep)
 	  ip             IP address
 	  method         HTTP method (eg GET, POST, HEAD, etc)
 	  proc           Processing time
@@ -98,22 +98,26 @@ _Additionally required for ncurses support:_
 
 	Operators:
 	----------
-	  <   less than                         (date and numeric fields only)
-	  >   greater than                      (date and numeric fields only)
-	  ==  equals (= is also valid)
-	  !=  does not equal (<> is also valid)
-	  =+  contains                          (string fields only)
-	  !+  does not contain                  (string fields only)
-	  =~  regex matches                     (string fields only)
-	  !~  regex does not match              (string fields only)
-	  ~<  round field down to the nearest n (numeric fields only)
-	  ~>  round field up to the nearest n   (numeric fields only)
-	  {}  regex substitution: {search}{replace} (string fields only, case insensitive)
-	  /   divide                            (numeric fields only)
-	  *   multiply                          (numeric fields only)
+	  <   less than                             (date and numeric fields only)
+	  >   greater than                          (date and numeric fields only)
+	  ==  equals (= is also valid)              (all fields)
+	  !=  does not equal (<> is also valid)     (all fields)
+	  =+  contains                              (string fields only)
+	  !+  does not contain                      (string fields only)
+	  =~  regex matches                         (string fields only)
+	  !~  regex does not match                  (string fields only)
+	  ~<  round field down to the nearest n     (numeric fields only)
+	  ~>  round field up to the nearest n       (numeric fields only)
+	  {}  regex substitution: {search}{replace} (string fields only)
+	  /   divide                                (numeric fields only)
+	  *   multiply                              (numeric fields only)
 
 	Date / Time Formats:
 	--------------------
 	  date: dd-mm-yyyy
 	  time: hh:mm
-	(Date and time fields are entered as strings but processed as numeric fields)
+	  Date and time fields are entered as strings but processed as numeric fields.
+
+	String Formats:
+	--------------------
+	  Regex operators are case insensitive, all other operators are case sensitive.
