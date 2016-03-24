@@ -22,7 +22,7 @@ _Additionally required for ncurses support:_
     go get github.com/mattn/go-sqlite3    # sqlite engine
 
 
-### firesward -hf
+### firesward -h
 
 	Usage: firesword -n [-r int] [-t int]     -f str | *
 	                 [--fmt str] [--grep str] --stdin | -f str | *
