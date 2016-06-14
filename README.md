@@ -1,23 +1,11 @@
 # Firesword
 
-An apachetop-style project + log parsing. Provides CLI piping, ncurses and SQL queries.
-
-There's still a few bugs to be fixed and features I'm planning to add, but it's already a fairly stable project and very much usable.
-
-_About nurses support:_
-
-Ncurses can be enabled or disabled via '`// +build ignore`' at the top of ncurses.go
-
-Ncurses mode also requires sqlite and readline, so compiling with ncurses breaks cross-compiling portability (which is why I disable it by default)
+A fast command line tool for parsing Apache log files.
 
 ### Required imports:
 
     go get github.com/lmorg/apachelogs    # my apache log parsing package
     go get github.com/ActiveState/tail    # tail -f like library
-
-_Additionally required for sqlite support:_
-
-    go get github.com/mattn/go-sqlite3    # sqlite engine
 
 
 ### firesward -h
