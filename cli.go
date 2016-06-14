@@ -36,25 +36,29 @@ var (
 	FIELD_UID      = "uid"
 	FIELD_FILE     = "file"
 
-	bFIELD_IP       = []byte("ip")
-	bFIELD_METHOD   = []byte("method")
-	bFIELD_PROC     = []byte("proc")
-	bFIELD_PROTO    = []byte("proto")
-	bFIELD_QS       = []byte("qs")
-	bFIELD_REF      = []byte("ref")
-	bFIELD_SIZE     = []byte("size")
-	bFIELD_STATUS   = []byte("status")
-	bFIELD_STITLE   = []byte("stitle")
-	bFIELD_SDESC    = []byte("sdesc")
-	bFIELD_TIME     = []byte("time")
-	bFIELD_DATE     = []byte("date")
-	bFIELD_DATETIME = []byte("datetime")
-	bFIELD_EPOCH    = []byte("epoch")
-	bFIELD_UNIX     = []byte("unix")
-	bFIELD_URI      = []byte("uri")
-	bFIELD_UA       = []byte("ua")
-	bFIELD_UID      = []byte("uid")
-	bFIELD_FILE     = []byte("file")
+	// As odd as seems duplicating field names from the above,
+	// this method is quicker out printing to STDOUT as we can
+	// alternate between strings and character arrays depending
+	// on the core libs.
+	bFIELD_IP       = []byte(FIELD_IP)
+	bFIELD_METHOD   = []byte(FIELD_METHOD)
+	bFIELD_PROC     = []byte(FIELD_PROC)
+	bFIELD_PROTO    = []byte(FIELD_PROTO)
+	bFIELD_QS       = []byte(FIELD_QS)
+	bFIELD_REF      = []byte(FIELD_REF)
+	bFIELD_SIZE     = []byte(FIELD_SIZE)
+	bFIELD_STATUS   = []byte(FIELD_STATUS)
+	bFIELD_STITLE   = []byte(FIELD_STITLE)
+	bFIELD_SDESC    = []byte(FIELD_SDESC)
+	bFIELD_TIME     = []byte(FIELD_TIME)
+	bFIELD_DATE     = []byte(FIELD_DATE)
+	bFIELD_DATETIME = []byte(FIELD_DATETIME)
+	bFIELD_EPOCH    = []byte(FIELD_EPOCH)
+	bFIELD_UNIX     = []byte(FIELD_UNIX)
+	bFIELD_URI      = []byte(FIELD_URI)
+	bFIELD_UA       = []byte(FIELD_UA)
+	bFIELD_UID      = []byte(FIELD_UID)
+	bFIELD_FILE     = []byte(FIELD_FILE)
 )
 
 // Field lengths
@@ -104,13 +108,13 @@ func cliInterface() {
 	} else if len(f_files_stream) > 0 {
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
-			go ReadFileStreamWrapper(f_files_stream[i], &wg)
+			go ReadFileStream(f_files_stream[i], &wg)
 		}
 
 	} else if len(f_files_static) > 0 {
 		for i := 0; i < len(f_files_static); i++ {
 			wg.Add(1)
-			go ReadFileStaticWrapper(f_files_static[i], &wg)
+			go ReadFileStatic(f_files_static[i], &wg)
 		}
 
 	} else {

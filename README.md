@@ -15,10 +15,8 @@ Ncurses mode also requires sqlite and readline, so compiling with ncurses breaks
     go get github.com/lmorg/apachelogs    # my apache log parsing package
     go get github.com/ActiveState/tail    # tail -f like library
 
-_Additionally required for ncurses support:_
+_Additionally required for sqlite support:_
 
-    go get github.com/nsf/termbox-go      # pretty terminal APIs
-    go get github.com/shavac/readline     # readline.c support for inputting SQL
     go get github.com/mattn/go-sqlite3    # sqlite engine
 
 
@@ -33,12 +31,6 @@ _Additionally required for ncurses support:_
 	  --no-smp       Disable multi-processor support (SMP enabled by default)
 	  --no-errors    Surpress error messages, don't fail on unless fatal
 
-	Ncurses interface:
-	------------------
-	  -n             Start ncurses mode. The real time user interface
-	  -r int         Refresh rate in seconds (default is 1 second)
-	  --sql str      SQL to start with (default is "SELECT * FROM default_view")
-
 	Command line interface:
 	-----------------------
 	  --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
@@ -48,7 +40,7 @@ _Additionally required for ncurses support:_
 
 	Input streams:
 	--------------
-	  --stdin        Read from STDIN (not available in ncurses mode)
+	  --stdin        Read from STDIN
 	  -f str         Read from text stream, equivalent to tail -f (file name as string)
 	  *              Read from text / gzip file (multiple files space delimited)
 

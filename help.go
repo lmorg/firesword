@@ -21,7 +21,7 @@ Command line interface:
 
 Input streams:
 --------------
-  --stdin        Read from STDIN (not available in ncurses mode)
+  --stdin        Read from STDIN
   -f str         Read from text stream, equivalent to tail -f (file name as string)
   *              Read from text / gzip file (multiple files space delimited)
 
