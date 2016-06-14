@@ -12,15 +12,17 @@ import (
 
 var db *sql.DB
 
-func New( /*filename string*/ ) {
+func New() {
 	// empty string == in memory
 	//if filename == "" {
-	filename := ":memory:"
+	//filename := ":memory:"
 	//filename := "logs.db"
 	//}
 
 	var err error
-	db, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&mode=rwc", filename))
+	//db, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&mode=rwc", filename))
+	db, err = sql.Open("sqlite3", "file:memdb1?mode=memory&cache=shared")
+	//init_db, err = sql.Open("sqlite3", "file:test.db?cache=shared")
 	if err != nil {
 		log.Fatalln("could not open database:", err)
 	}
@@ -48,10 +50,9 @@ func New( /*filename string*/ ) {
 		view(_VIEW_COUNT_SIZE)
 		view(_VIEW_LIST_VIEWS)
 	*/
-
 }
 
-func InsertAccess(access apachelogs.AccessLog) (err error) {
+func InsertAccess(access *apachelogs.AccessLog) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = errors.New(fmt.Sprintf("Panic caught: %s", r))
@@ -90,6 +91,10 @@ func Query(sql string) (rows *sql.Rows, err error) {
 
 	return
 }*/
+
+func Dump(filename string) {
+	//go-sqlite3.
+}
 
 func Close() {
 	db.Close()

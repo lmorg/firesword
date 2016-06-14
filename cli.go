@@ -101,6 +101,10 @@ func cliInterface() {
 	cropUnusedFmt()
 	ImportStrLen()
 
+	if f_write_sqlite != "" {
+		sqlite.New()
+	}
+
 	if f_read_stdin {
 		wg.Add(1)
 		go ReadSTDIN()
@@ -123,6 +127,11 @@ func cliInterface() {
 	}
 
 	wg.Wait()
+
+	if f_write_sqlite != "" {
+		sqlite.Dump(f_write_sqlite)
+		sqlite.Close()
+	}
 }
 
 // Check if fields are being used in --fmt. Do this up front and
@@ -268,6 +277,14 @@ func PrintAccessLogs(access *apachelogs.AccessLog) {
 		} else if access.URI == "/" {
 			access.URI = "-"
 		}
+	}
+
+	if f_write_sqlite != "" {
+		go func() {
+			if err := sqlite.InsertAccess(access); err != nil {
+				PrintStdError(err.Error())
+			}
+		}()
 	}
 
 	b := []byte(f_stdout_fmt)

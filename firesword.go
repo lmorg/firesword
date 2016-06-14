@@ -39,13 +39,11 @@ var (
 	f_files_stream FlagStrings
 	f_files_static FlagStrings
 
+	// Output streams
+	f_write_sqlite string
+
 	// Usage
 	f_help1, f_help2, f_help_f, f_help_g, f_version1, f_version2 bool
-
-	// Output handlers to manage between CLI and ncurses modes
-	stdout_handler func(access *apachelogs.AccessLog)
-	stderr_handler func(message string)
-	main_handler   func()
 
 	// Lazy fix to check if compiled with ncurses.
 	// Ncurses can be enabled or disabled via '// +build ignore' (without quotes)
@@ -65,24 +63,27 @@ func flags() {
 	flag.Usage = Usage
 
 	// global
-	flag.BoolVar(&f_no_errors, "no-errors", false, "surpress errors")
+	flag.BoolVar(&f_no_errors, "no-errors", false, "")
 
 	// CLI interface
-	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "STDOUT format")
-	flag.StringVar(&f_patterns, "grep", "", "filter results")
+	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "")
+	flag.StringVar(&f_patterns, "grep", "", "")
 	flag.BoolVar(&f_trim_slash, "trim-slash", false, "")
 
 	// Input streams
 	flag.BoolVar(&f_read_stdin, "stdin", false, "")
-	flag.Var(&f_files_stream, "f", "tail -f stream")
+	flag.Var(&f_files_stream, "f", "")
+
+	// Output streams
+	flag.StringVar(&f_write_sqlite, "sqlout", "", "")
 
 	// help
-	flag.BoolVar(&f_help1, "h", false, "help")
-	flag.BoolVar(&f_help2, "?", false, "Same as -h")
-	flag.BoolVar(&f_help_f, "hf", false, "format field names")
-	flag.BoolVar(&f_help_g, "hg", false, "grep guide")
-	flag.BoolVar(&f_version1, "v", false, "version")
-	flag.BoolVar(&f_version2, "version", false, "same as -v")
+	flag.BoolVar(&f_help1, "h", false, "")
+	flag.BoolVar(&f_help2, "?", false, "")
+	flag.BoolVar(&f_help_f, "hf", false, "")
+	flag.BoolVar(&f_help_g, "hg", false, "")
+	flag.BoolVar(&f_version1, "v", false, "")
+	flag.BoolVar(&f_version2, "version", false, "")
 
 	flag.Parse()
 	f_files_static = flag.Args()
@@ -121,9 +122,5 @@ func main() {
 		apachelogs.Patterns = PatternDeconstructor(f_patterns)
 	}
 
-	stdout_handler = PrintAccessLogs
-	stderr_handler = PrintStdError
-	main_handler = cliInterface
-
-	main_handler()
+	cliInterface()
 }

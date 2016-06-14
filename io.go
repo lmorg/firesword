@@ -18,7 +18,7 @@ func ReadSTDIN() {
 
 		if err == nil && matched {
 			access.FileName = "<STDIN>"
-			stdout_handler(access)
+			PrintAccessLogs(access)
 
 		} else if err != nil {
 			errOut(err)
@@ -31,7 +31,7 @@ func ReadFileStream(filename string, wg *sync.WaitGroup) {
 
 	t, err := tail.TailFile(filename, tail.Config{Follow: true})
 	if err != nil {
-		// TODO: this is shit.
+		// TODO: this is shit!!
 		panic(err)
 	}
 	for line := range t.Lines {
@@ -44,7 +44,8 @@ func ReadFileStream(filename string, wg *sync.WaitGroup) {
 
 func ReadFileStatic(filename string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	apachelogs.ReadAccessLog(filename, stdout_handler, errOut)
+
+	apachelogs.ReadAccessLog(filename, PrintAccessLogs, errOut)
 }
 
 func errOut(err error) {
@@ -52,5 +53,5 @@ func errOut(err error) {
 		return
 	}
 
-	stderr_handler(err.Error())
+	PrintStdError(err.Error())
 }
