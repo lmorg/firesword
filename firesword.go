@@ -3,16 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/lmorg/apachelogs"
 	"os"
 	"runtime"
+
+	"github.com/lmorg/apachelogs"
 )
 
 // App versioning
 const (
-	APP_NAME  = "Firesword"
-	VERSION   = "0.12.500 BETA"
-	COPYRIGHT = "© 2014-2015 Laurence Morgan"
+	APP_NAME  = "Plasmasword"
+	VERSION   = "2.00.600 BETA"
+	COPYRIGHT = "© 2014-2016 Laurence Morgan"
 )
 
 // Date / time output formatting
@@ -27,11 +28,6 @@ var (
 	// Global
 	f_no_smp    bool
 	f_no_errors bool
-
-	// Ncurses interface
-	f_ncurses bool
-	f_sql     string
-	f_refresh int64
 
 	// CLI interface
 	f_stdout_fmt string
@@ -57,7 +53,7 @@ var (
 	//
 	// Ncurses mode also requires sqlite and readline - so compiling with ncurses
 	// breaks cross-compiling portability for the sake of extra features.
-	ncurses_compiled bool
+	//ncurses_compiled bool
 )
 
 type FlagStrings []string
@@ -69,13 +65,7 @@ func flags() {
 	flag.Usage = Usage
 
 	// global
-	flag.BoolVar(&f_no_smp, "no-smp", false, "GOMAXPROCS")
 	flag.BoolVar(&f_no_errors, "no-errors", false, "surpress errors")
-
-	// Ncurses interface
-	flag.BoolVar(&f_ncurses, "n", false, "Ncurses interface")
-	flag.Int64Var(&f_refresh, "r", 1, "Ncursers refresh rate")
-	flag.StringVar(&f_sql, "sql", "SELECT * FROM default_view", "")
 
 	// CLI interface
 	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "STDOUT format")
@@ -131,17 +121,9 @@ func main() {
 		apachelogs.Patterns = PatternDeconstructor(f_patterns)
 	}
 
-	if f_ncurses {
-		if !ncurses_compiled {
-			fmt.Println(APP_NAME, "has been compiled without ncurses support.")
-			os.Exit(1)
-		}
-
-	} else {
-		stdout_handler = PrintAccessLogs
-		stderr_handler = PrintStdError
-		main_handler = cliInterface
-	}
+	stdout_handler = PrintAccessLogs
+	stderr_handler = PrintStdError
+	main_handler = cliInterface
 
 	main_handler()
 }

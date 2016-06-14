@@ -12,12 +12,6 @@ Global preferences:
   --no-smp       Disable multi-processor support (SMP enabled by default)
   --no-errors    Surpress error messages, don't fail on unless fatal
 
-Ncurses interface:
-------------------
-  -n             Start ncurses mode. The real time user interface
-  -r int         Refresh rate in seconds (default is 1 second)
-  --sql str      SQL to start with (default is "SELECT * FROM default_view")
-
 Command line interface:
 -----------------------
   --fmt str      Output format (default: "{ip} {uri} {status} {stitle}")
@@ -38,9 +32,7 @@ Help:
   -hg            Prints grep pattern guide
   -v             Prints version number
 `)
-	if !ncurses_compiled {
-		fmt.Println("!!!", APP_NAME, "has been compiled without ncurses support !!!")
-	}
+
 }
 
 func HelpDetail() {
