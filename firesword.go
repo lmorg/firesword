@@ -4,15 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/lmorg/apachelogs"
 )
 
 // App versioning
 const (
-	APP_NAME  = "Plasmasword"
-	VERSION   = "2.00.600 BETA"
+	APP_NAME  = "Firesword"
+	VERSION   = "2.00.650 BETA"
 	COPYRIGHT = "© 2014-2016 Laurence Morgan"
 )
 
@@ -26,7 +25,6 @@ const (
 // Command line flags
 var (
 	// Global
-	f_no_smp    bool
 	f_no_errors bool
 
 	// CLI interface
@@ -38,9 +36,6 @@ var (
 	f_read_stdin   bool
 	f_files_stream FlagStrings
 	f_files_static FlagStrings
-
-	// Output streams
-	f_write_sqlite string
 
 	// Usage
 	f_help1, f_help2, f_help_f, f_help_g, f_version1, f_version2 bool
@@ -73,9 +68,6 @@ func flags() {
 	// Input streams
 	flag.BoolVar(&f_read_stdin, "stdin", false, "")
 	flag.Var(&f_files_stream, "f", "")
-
-	// Output streams
-	flag.StringVar(&f_write_sqlite, "sqlout", "", "")
 
 	// help
 	flag.BoolVar(&f_help1, "h", false, "")
@@ -112,10 +104,6 @@ func main() {
 	if f_version1 || f_version2 {
 		fmt.Println(APP_NAME, VERSION, "\n"+COPYRIGHT)
 		os.Exit(1)
-	}
-
-	if !f_no_smp {
-		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
 	if f_patterns != "" {

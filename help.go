@@ -9,7 +9,6 @@ func Usage() {
 
 Global preferences:
 -------------------
-  --no-smp       Disable multi-processor support (SMP enabled by default)
   --no-errors    Surpress error messages, don't fail on unless fatal
 
 Command line interface:
