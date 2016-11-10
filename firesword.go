@@ -6,47 +6,41 @@ import (
 	"os"
 
 	"github.com/lmorg/apachelogs"
+	"sync"
 )
 
 // App versioning
 const (
-	APP_NAME  = "Firesword"
-	VERSION   = "2.00.650 BETA"
-	COPYRIGHT = "© 2014-2016 Laurence Morgan"
+	AppName   = "Firesword"
+	Version   = "3.00.0800"
+	Copyright = "© 2014-2016 Laurence Morgan"
 )
 
 // Date / time output formatting
 const (
-	FMT_DATE     = "02 Jan 2006"
-	FMT_TIME     = "15:04:05"
-	FMT_DATETIME = FMT_DATE + " " + FMT_TIME
+	DateFormat     = "02 Jan 2006"
+	TimeFormat     = "15:04:05"
+	DateTimeFormat = DateFormat + " " + TimeFormat
 )
 
 // Command line flags
 var (
 	// Global
-	f_no_errors bool
+	fNoErrors bool
 
 	// CLI interface
-	f_stdout_fmt string
-	f_patterns   string
-	f_trim_slash bool
+	fStdOutFormat string
+	fPatterns     string
+	fTrimSlash    bool
+	fGroupBy      int
 
 	// Input streams
-	f_read_stdin   bool
-	f_files_stream FlagStrings
-	f_files_static FlagStrings
+	fReadStdIn   bool
+	fFilesStream FlagStrings
+	fFilesStatic FlagStrings
 
 	// Usage
-	f_help1, f_help2, f_help_f, f_help_g, f_version1, f_version2 bool
-
-	// Lazy fix to check if compiled with ncurses.
-	// Ncurses can be enabled or disabled via '// +build ignore' (without quotes)
-	// at the top of ncurses.go
-	//
-	// Ncurses mode also requires sqlite and readline - so compiling with ncurses
-	// breaks cross-compiling portability for the sake of extra features.
-	//ncurses_compiled bool
+	fHelp1, fHelp2, fHelpF, fHelpG, fVersion1, fVersion2 bool
 )
 
 type FlagStrings []string
@@ -58,57 +52,78 @@ func flags() {
 	flag.Usage = Usage
 
 	// global
-	flag.BoolVar(&f_no_errors, "no-errors", false, "")
+	flag.BoolVar(&fNoErrors, "no-errors", false, "")
 
 	// CLI interface
-	flag.StringVar(&f_stdout_fmt, "fmt", "{ip} {uri} {status} {stitle}", "")
-	flag.StringVar(&f_patterns, "grep", "", "")
-	flag.BoolVar(&f_trim_slash, "trim-slash", false, "")
+	flag.StringVar(&fStdOutFormat, "fmt", "{ip} {uri} {status} {stitle}", "")
+	flag.StringVar(&fPatterns, "grep", "", "")
+	flag.BoolVar(&fTrimSlash, "trim-slash", false, "")
+	flag.IntVar(&fGroupBy, "group-by", 0, "")
 
 	// Input streams
-	flag.BoolVar(&f_read_stdin, "stdin", false, "")
-	flag.Var(&f_files_stream, "f", "")
+	flag.BoolVar(&fReadStdIn, "stdin", false, "")
+	flag.Var(&fFilesStream, "f", "")
 
 	// help
-	flag.BoolVar(&f_help1, "h", false, "")
-	flag.BoolVar(&f_help2, "?", false, "")
-	flag.BoolVar(&f_help_f, "hf", false, "")
-	flag.BoolVar(&f_help_g, "hg", false, "")
-	flag.BoolVar(&f_version1, "v", false, "")
-	flag.BoolVar(&f_version2, "version", false, "")
+	flag.BoolVar(&fHelp1, "h", false, "")
+	flag.BoolVar(&fHelp2, "?", false, "")
+	flag.BoolVar(&fHelpF, "hf", false, "")
+	flag.BoolVar(&fHelpG, "hg", false, "")
+	flag.BoolVar(&fVersion1, "v", false, "")
+	flag.BoolVar(&fVersion2, "version", false, "")
 
 	flag.Parse()
-	f_files_static = flag.Args()
-}
+	fFilesStatic = flag.Args()
 
-func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Panic caught:", r)
-			os.Exit(2)
-		}
-	}()
-
-	flags()
-
-	if f_help1 || f_help2 {
+	if fHelp1 || fHelp2 {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	if f_help_f || f_help_g {
+	if fHelpF || fHelpG {
 		HelpDetail()
 		os.Exit(1)
 	}
 
-	if f_version1 || f_version2 {
-		fmt.Println(APP_NAME, VERSION, "\n"+COPYRIGHT)
+	if fVersion1 || fVersion2 {
+		fmt.Println(AppName, Version, "\n"+Copyright)
 		os.Exit(1)
 	}
 
-	if f_patterns != "" {
-		apachelogs.Patterns = PatternDeconstructor(f_patterns)
+	if fPatterns != "" {
+		apachelogs.Patterns = PatternDeconstructor(fPatterns)
+	}
+}
+
+func main() {
+	flags()
+
+	var wg sync.WaitGroup
+
+	//GroupsCreate()
+	cropUnusedFmt()
+	ImportStrLen()
+
+	if fReadStdIn {
+		wg.Add(1)
+		go ReadStdIn()
+
+	} else if len(fFilesStream) > 0 {
+		for i := 0; i < len(fFilesStatic); i++ {
+			wg.Add(1)
+			go ReadFileStream(fFilesStream[i], &wg)
+		}
+
+	} else if len(fFilesStatic) > 0 {
+		for i := 0; i < len(fFilesStatic); i++ {
+			wg.Add(1)
+			go ReadFileStatic(fFilesStatic[i], &wg)
+		}
+
+	} else {
+		fmt.Println("No input files given. Run with -h for help")
+		os.Exit(1)
 	}
 
-	cliInterface()
+	wg.Wait()
 }

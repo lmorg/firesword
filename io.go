@@ -9,7 +9,7 @@ import (
 	"github.com/lmorg/apachelogs"
 )
 
-func ReadSTDIN() {
+func ReadStdIn() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		s := scanner.Text()
@@ -49,7 +49,7 @@ func ReadFileStatic(filename string, wg *sync.WaitGroup) {
 }
 
 func errOut(err error) {
-	if f_no_errors {
+	if fNoErrors {
 		return
 	}
 

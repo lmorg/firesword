@@ -35,7 +35,7 @@ Help:
 }
 
 func HelpDetail() {
-	if f_help_f {
+	if fHelpF {
 		fmt.Print(`Field names:
 ------------
   date           Date of request

@@ -19,41 +19,41 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 		}
 
 		var (
-			f  apachelogs.FieldID
+			f  apachelogs.AccessFieldId
 			op apachelogs.OperatorID
 		)
 
 		switch pat[1] {
-		case FIELD_IP:
-			f = apachelogs.FIELD_IP
-		case FIELD_METHOD:
-			f = apachelogs.FIELD_METHOD
-		case FIELD_PROC:
-			f = apachelogs.FIELD_PROC_TIME
-		case FIELD_PROTO:
-			f = apachelogs.FIELD_PROTOCOL
-		case FIELD_QS:
-			f = apachelogs.FIELD_QUERY_STRING
-		case FIELD_REF:
-			f = apachelogs.FIELD_REFERRER
-		case FIELD_SIZE:
-			f = apachelogs.FIELD_SIZE
-		case FIELD_STATUS:
-			f = apachelogs.FIELD_STATUS
-		case FIELD_TIME:
-			f = apachelogs.FIELD_TIME
-		case FIELD_DATE:
-			f = apachelogs.FIELD_DATE
-		case FIELD_DATETIME:
-			f = apachelogs.FIELD_DATE_TIME
-		case FIELD_URI:
-			f = apachelogs.FIELD_URI
-		case FIELD_UA:
-			f = apachelogs.FIELD_USER_AGENT
-		case FIELD_UID:
-			f = apachelogs.FIELD_USER_ID
-		case FIELD_EPOCH, FIELD_UNIX:
-			f = apachelogs.FIELD_DATE_TIME
+		case accFieldIp:
+			f = apachelogs.AccFieldIp
+		case accFieldMethod:
+			f = apachelogs.AccFieldMethod
+		case accFieldProcTime:
+			f = apachelogs.AccFieldProcTime
+		case accFieldProtocol:
+			f = apachelogs.AccFieldProtocol
+		case accFieldQueryString:
+			f = apachelogs.AccFieldQueryString
+		case accFieldReferrer:
+			f = apachelogs.AccFieldReferrer
+		case accFieldSize:
+			f = apachelogs.AccFieldSize
+		case accFieldStatus:
+			f = apachelogs.AccFieldStatus
+		case accFieldTime:
+			f = apachelogs.AccFieldTime
+		case accFieldDate:
+			f = apachelogs.AccFieldDate
+		case accFieldDateTime:
+			f = apachelogs.AccFieldDateTime
+		case accFieldUri:
+			f = apachelogs.AccFieldUri
+		case accFieldUserAgent:
+			f = apachelogs.AccFieldUserAgent
+		case accFieldUserId:
+			f = apachelogs.AccFieldUserId
+		case accFieldEpoch, accFieldUnix:
+			f = apachelogs.AccFieldDateTime
 			t, err := strconv.ParseInt(pat[3], 10, 64)
 			if err != nil {
 				fmt.Println(err)
@@ -68,31 +68,31 @@ func PatternDeconstructor(cli string) (p []apachelogs.Pattern) {
 
 		switch pat[2] {
 		case "<":
-			op = apachelogs.OP_LESS_THAN
+			op = apachelogs.OpLessThan
 		case "=+":
-			op = apachelogs.OP_CONTAINS
+			op = apachelogs.OpContains
 		case "!+":
-			op = apachelogs.OP_NOT_CONTAIN
+			op = apachelogs.OpDoesNotContain
 		case "==", "=":
-			op = apachelogs.OP_EQUAL_TO
+			op = apachelogs.OpEqualTo
 		case "!=", "<>":
-			op = apachelogs.OP_NOT_EQUAL
+			op = apachelogs.OpNotEqual
 		case ">":
-			op = apachelogs.OP_GREATER_THAN
+			op = apachelogs.OpGreaterThan
 		case "=~":
-			op = apachelogs.OP_REGEX_EQ
+			op = apachelogs.OpRegexEqual
 		case "!~":
-			op = apachelogs.OP_REGEX_NE
+			op = apachelogs.OpRegexNotEqual
 		case "~<":
-			op = apachelogs.OP_ROUND_DOWN
+			op = apachelogs.OpRoundDown
 		case "~>":
-			op = apachelogs.OP_ROUND_UP
+			op = apachelogs.OpRoundUp
 		case "{}":
-			op = apachelogs.OP_REGEX_SUB
+			op = apachelogs.OpRegexSubstitute
 		case "/":
-			op = apachelogs.OP_DIVIDE
+			op = apachelogs.OpDivide
 		case "*":
-			op = apachelogs.OP_MULTIPLY
+			op = apachelogs.OpMultiply
 		default:
 			fmt.Printf("Invalid operator: %s\n", pat[2])
 			os.Exit(1)
