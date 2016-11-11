@@ -12,7 +12,8 @@ import (
 
 // Command line field names.
 // The code duplication is nasty, but realistically it needs to be
-// both string and byte slice for performance reasons.
+// both string and byte slice for performance reasons. Having this
+// duplication compiled in saves conversion overhead in tight loops.
 var (
 	accFieldIp          = "ip"
 	accFieldMethod      = "method"
@@ -35,9 +36,9 @@ var (
 	accFieldFileName    = "file"
 
 	// As odd as seems duplicating field names from the above,
-	// this method is quicker out printing to STDOUT as we can
+	// this method is quicker at printing to stdout as we can
 	// alternate between strings and character arrays depending
-	// on the core libs.
+	// on the core libs being used.
 	bAccFieldIp          = []byte(accFieldIp)
 	bAccFieldMethod      = []byte(accFieldMethod)
 	bAccFieldProcTime    = []byte(accFieldProcTime)
